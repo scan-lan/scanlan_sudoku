@@ -1,7 +1,9 @@
 mod sudoku {
     use std::fmt;
 
-    type Grid = [[Cell; 9]; 9];
+    use crate::{CELL_WIDTH, ORDER, SIZE};
+
+    type Grid = [[Cell; SIZE]; SIZE];
 
     #[derive(Clone, Copy, Debug, PartialEq)]
     pub enum Cell {
@@ -12,10 +14,11 @@ mod sudoku {
 
     impl fmt::Display for Cell {
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            let width = usize::try_from(CELL_WIDTH).expect("cell width should always be small");
             match self {
-                Self::Given(n) => write!(f, "{n}"),
-                Self::Filled(n) => write!(f, "{n}"),
-                Self::Empty => write!(f, " "),
+                Self::Given(n) => write!(f, "{:width$}", n),
+                Self::Filled(n) => write!(f, "{:width$}", n),
+                Self::Empty => write!(f, "{:width$}", " "),
             }
         }
     }
@@ -23,14 +26,22 @@ mod sudoku {
     #[derive(Debug)]
     pub struct Puzzle {
         grid: Grid,
-        solution: [[u8; 9]; 9],
+        solution: [[u8; SIZE]; SIZE],
     }
 
     impl Puzzle {
         pub fn new() -> Puzzle {
+            let mut base_solution = [[0u8; SIZE]; SIZE];
+            for i in 0..SIZE {
+                for j in 0..SIZE {
+                    base_solution[i][j] =
+                        (1 + (j + (i / ORDER) + (i % ORDER) * ORDER) % SIZE) as u8;
+                }
+            }
+
             Puzzle {
-                grid: [[Cell::Empty; 9]; 9],
-                solution: [[0; 9]; 9],
+                grid: [[Cell::Empty; SIZE]; SIZE],
+                solution: base_solution,
             }
         }
 
@@ -38,36 +49,49 @@ mod sudoku {
             &self.grid
         }
 
-        // for (let i = 0; i < 9; i++) {
-        //   for (let j = 0; j < 9; j++) {
-        //     const value = (j + (Math.floor(i / 3) + 1) + (i % 3) * 3) % 9;
-        fn solution() -> [[u8; 9]; 9] {
-            let mut base_solution = [[0u8; 9]; 9];
-            for i in 0..9 {
-                for j in 0..9 {
-                    base_solution[i][j] = ((j + (i / 3 + 1) + (i % 3) * 3) % 9) as u8;
+        pub fn solution(&self) -> &[[u8; SIZE]; SIZE] {
+            &self.solution
+        }
+    }
+
+    impl fmt::Display for Puzzle {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            let cell_width =
+                usize::try_from(CELL_WIDTH).expect("cell width should always be small");
+            let box_width: usize = cell_width * ORDER + cell_width - 1;
+
+            for (i, row) in self.solution.iter().enumerate() {
+                for (j, cell) in row.iter().enumerate() {
+                    write!(f, "{:>cell_width$}", cell)?;
+                    if j != SIZE - 1 && j % ORDER == ORDER - 1 {
+                        write!(f, "{:>cell_width$}", "|")?;
+                    }
+                }
+                write!(f, "\n")?;
+                if i != SIZE - 1 && i % ORDER == ORDER - 1 {
+                    let line = format!("{:->box_width$}", "-");
+                    for _ in 1..ORDER {
+                        write!(f, "{line}+")?;
+                    }
+                    writeln!(f, "{line}")?;
                 }
             }
-
-            base_solution
+            Ok(())
         }
     }
 
     #[cfg(test)]
     mod grid_tests {
+        use crate::SIZE;
+
         use super::{Cell, Puzzle};
 
         #[test]
         fn create_empty_puzzle() {
             let p = Puzzle::new();
-            let expected_grid = [[Cell::Empty; 9]; 9];
+            let expected_grid = [[Cell::Empty; SIZE]; SIZE];
 
             assert_eq!(p.grid, expected_grid);
-        }
-
-        #[test]
-        fn build_puzzle() {
-            todo!()
         }
 
         #[test]
@@ -81,5 +105,5 @@ pub use sudoku::Puzzle;
 
 pub fn run() {
     let mut p = Puzzle::new();
-    println!("{:?}", &p);
+    println!("{p}");
 }
