@@ -6,7 +6,7 @@ pub fn run() {
 }
 
 mod sudoku {
-    use std::fmt;
+    use std::{array, fmt};
 
     use crate::{CELL_WIDTH, ORDER, SIZE};
 
@@ -31,7 +31,11 @@ mod sudoku {
     type Group = [Cell; SIZE];
 
     #[derive(Debug)]
-    struct Grid([Group; SIZE]);
+    struct Grid {
+        rows: [Group; SIZE],
+        cols: [Group; SIZE],
+        boxes: [Group; SIZE],
+    }
 
     impl fmt::Display for Grid {
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -39,7 +43,7 @@ mod sudoku {
                 usize::try_from(CELL_WIDTH).expect("cell width should always be small");
             let box_width: usize = cell_width * ORDER + cell_width - 1;
 
-            for (i, row) in self.0.iter().enumerate() {
+            for (i, row) in self.rows.iter().enumerate() {
                 for (j, cell) in row.iter().enumerate() {
                     write!(f, "{:>cell_width$}", cell)?;
                     if j != SIZE - 1 && j % ORDER == ORDER - 1 {
@@ -60,8 +64,61 @@ mod sudoku {
     }
 
     impl Grid {
+        pub fn new() -> Grid {
+            Grid {
+                rows: [[Cell::Empty; SIZE]; SIZE],
+                cols: [[Cell::Empty; SIZE]; SIZE],
+                boxes: [[Cell::Empty; SIZE]; SIZE],
+            }
+        }
+
+        pub fn from(rows: [Group; SIZE]) -> Grid {
+            Grid {
+                rows,
+                cols: rows,
+                boxes: rows,
+            }
+        }
+
         pub fn get_row(&self, idx: usize) -> &Group {
-            &self.0[idx]
+            &self.rows[idx]
+        }
+
+        pub fn get_col(&self, idx: usize) -> &Group {
+            &self.cols[idx]
+        }
+
+        pub fn get_box(&self, idx: usize) -> &Group {
+            &self.boxes[idx]
+        }
+    }
+
+    #[cfg(test)]
+    mod grid_tests {
+        use super::{get_base_solution, Cell, Group};
+
+        #[test]
+        fn get_row() {
+            let expected: Group =
+                core::array::from_fn(|i| Cell::Given((i + 1).try_into().unwrap()));
+            let g = get_base_solution();
+
+            assert_eq!(g.get_row(0), &expected);
+        }
+
+        #[test]
+        fn get_col() {
+            let expected = [1u8, 4, 7, 2, 5, 8, 3, 6, 9];
+            let g = get_base_solution();
+            let col = g.get_col(0);
+
+            assert!(expected.iter().enumerate().all(|(i, val)| {
+                if let Cell::Given(n) = col[i] {
+                    &n == val
+                } else {
+                    false
+                }
+            }))
         }
     }
 
@@ -74,7 +131,7 @@ mod sudoku {
     impl Puzzle {
         pub fn new() -> Puzzle {
             Puzzle {
-                grid: Grid([[Cell::Empty; SIZE]; SIZE]),
+                grid: Grid::from([[Cell::Empty; SIZE]; SIZE]),
                 solution: get_base_solution(),
             }
         }
@@ -101,7 +158,7 @@ mod sudoku {
             }
         }
 
-        Grid(base_solution)
+        Grid::from(base_solution)
     }
 
     #[cfg(test)]
@@ -115,7 +172,7 @@ mod sudoku {
             let p = Puzzle::new();
             let expected_grid = [[Cell::Empty; SIZE]; SIZE];
 
-            assert_eq!(p.grid.0, expected_grid);
+            assert_eq!(p.grid.rows, expected_grid);
         }
 
         #[test]
@@ -137,20 +194,6 @@ mod sudoku {
             let p = Puzzle::new();
 
             assert_eq!(p.solution(), expected);
-        }
-    }
-
-    #[cfg(test)]
-    mod grid_tests {
-        use super::{get_base_solution, Cell};
-
-        #[test]
-        fn get_row() {
-            let expected: Group =
-                core::array::from_fn(|i| Cell::Given((i + 1).try_into().unwrap()));
-            let p = get_base_solution();
-
-            assert_eq!(p.get_row(0), &expected);
         }
     }
 }
