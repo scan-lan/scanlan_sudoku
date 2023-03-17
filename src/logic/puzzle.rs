@@ -10,7 +10,7 @@ impl Puzzle {
     pub fn new() -> Puzzle {
         Puzzle {
             grid: Grid::new(),
-            solution: get_base_solution(),
+            solution: Grid::from(get_base_solution()),
         }
     }
 

@@ -60,7 +60,7 @@ impl Grid {
     }
 }
 
-pub fn get_base_solution() -> Grid {
+pub fn get_base_solution() -> [Group; SIZE] {
     let mut base_solution = [[Cell::Empty; SIZE]; SIZE];
     for i in 0..SIZE {
         for j in 0..SIZE {
@@ -69,7 +69,7 @@ pub fn get_base_solution() -> Grid {
         }
     }
 
-    Grid::from(base_solution)
+    base_solution
 }
 
 impl fmt::Display for Grid {
@@ -97,30 +97,4 @@ impl fmt::Display for Grid {
     }
 }
 
-#[cfg(test)]
-mod grid_tests {
-    use super::{get_base_solution, Cell, Group};
-
-    #[test]
-    fn get_row() {
-        let expected: Group = core::array::from_fn(|i| Cell::Given((i + 1).try_into().unwrap()));
-        let g = get_base_solution();
-
-        assert_eq!(g.get_row(0), &expected);
-    }
-
-    #[test]
-    fn get_col() {
-        let expected = [1u8, 4, 7, 2, 5, 8, 3, 6, 9];
-        let g = get_base_solution();
-        let col = g.get_col(0);
-
-        assert!(expected.iter().enumerate().all(|(i, val)| {
-            if let Cell::Given(n) = col[i] {
-                &n == val
-            } else {
-                false
-            }
-        }))
-    }
-}
+mod grid_tests;
