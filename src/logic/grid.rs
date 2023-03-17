@@ -1,11 +1,22 @@
 use super::{Group, CELL_WIDTH, ORDER, SIZE};
-use std::fmt;
+use std::{array, fmt};
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug)]
 pub enum Cell {
     Given(u8),
     Filled(u8),
     Empty,
+}
+
+impl PartialEq for Cell {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Self::Empty, Self::Empty) => true,
+            (Self::Filled(n), Self::Filled(m)) => n == m,
+            (Self::Given(n), Self::Given(m)) => n == m,
+            _ => false,
+        }
+    }
 }
 
 impl fmt::Display for Cell {
@@ -26,6 +37,13 @@ pub struct Grid {
     boxes: [Group; SIZE],
 }
 
+fn get_box(rows: &[Group; SIZE], i: usize, j: usize) -> Cell {
+    let row = (i / ORDER) * ORDER + j / ORDER;
+    let col = (i % ORDER) * ORDER + j % ORDER;
+
+    rows[row][col]
+}
+
 impl Grid {
     pub fn new() -> Grid {
         Grid {
@@ -36,11 +54,10 @@ impl Grid {
     }
 
     pub fn from(rows: [Group; SIZE]) -> Grid {
-        Grid {
-            rows,
-            cols: rows,
-            boxes: rows,
-        }
+        let cols = array::from_fn(|i| array::from_fn(|j| rows[j][i]));
+        let boxes = array::from_fn(|i| array::from_fn(|j| get_box(&rows, i, j)));
+
+        Grid { rows, cols, boxes }
     }
 
     pub fn rows(&self) -> &[Group; SIZE] {

@@ -25,7 +25,7 @@ fn from_returns_correct_vals() {
         ],
         [
             Cell::Given(4),
-            Cell::Given(5),
+            Cell::Empty,
             Cell::Given(6),
             Cell::Given(7),
             Cell::Given(8),
@@ -126,7 +126,7 @@ fn from_returns_correct_vals() {
         ],
         [
             Cell::Given(2),
-            Cell::Given(5),
+            Cell::Empty,
             Cell::Given(8),
             Cell::Given(3),
             Cell::Given(6),
@@ -139,20 +139,20 @@ fn from_returns_correct_vals() {
             Cell::Given(3),
             Cell::Given(6),
             Cell::Given(9),
-            Cell::Given(1),
             Cell::Given(4),
             Cell::Given(7),
-            Cell::Given(2),
+            Cell::Given(1),
             Cell::Given(5),
             Cell::Given(8),
+            Cell::Given(2),
         ],
         [
             Cell::Given(4),
             Cell::Given(7),
             Cell::Given(1),
             Cell::Given(5),
-            Cell::Given(2),
             Cell::Given(8),
+            Cell::Given(2),
             Cell::Given(6),
             Cell::Given(9),
             Cell::Given(3),
@@ -213,10 +213,14 @@ fn from_returns_correct_vals() {
             Cell::Given(8),
         ],
     ];
-    // let expected_boxes = [[1,2,3,4,5,6,7,8,9],[4,5,6,7,8,9,1,2,3],[7,8,9,1,2,3,4,5,6],[2,3,4,]]
-    let g = Grid::from(get_base_solution());
+    let mut expected_boxes = expected_rows.to_owned();
+    expected_boxes[0][4] = Cell::Empty;
+    expected_boxes[1][1] = Cell::Given(5);
+    let mut rows = get_base_solution();
+    rows[1][1] = Cell::Empty;
+    let g = Grid::from(rows);
 
     assert_eq!(g.rows, expected_rows);
     assert_eq!(g.cols, expected_cols);
-    assert_eq!(g.boxes, expected_rows);
+    assert_eq!(g.boxes, expected_boxes);
 }
