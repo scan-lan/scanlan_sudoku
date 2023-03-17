@@ -28,8 +28,10 @@ mod sudoku {
         }
     }
 
+    type Group = [Cell; SIZE];
+
     #[derive(Debug)]
-    struct Grid([[Cell; SIZE]; SIZE]);
+    struct Grid([Group; SIZE]);
 
     impl fmt::Display for Grid {
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -58,7 +60,7 @@ mod sudoku {
     }
 
     impl Grid {
-        pub fn get_row(&self, idx: usize) -> &[Cell; SIZE] {
+        pub fn get_row(&self, idx: usize) -> &Group {
             &self.0[idx]
         }
     }
@@ -85,7 +87,7 @@ mod sudoku {
             format!("{}", self.solution)
         }
 
-        pub fn get_row(&self, idx: usize) -> &[Cell; SIZE] {
+        pub fn get_row(&self, idx: usize) -> &Group {
             self.grid.get_row(idx)
         }
     }
@@ -144,7 +146,7 @@ mod sudoku {
 
         #[test]
         fn get_row() {
-            let expected: [Cell; 9] =
+            let expected: Group =
                 core::array::from_fn(|i| Cell::Given((i + 1).try_into().unwrap()));
             let p = get_base_solution();
 
