@@ -37,11 +37,11 @@ pub struct Grid {
     boxes: [Group; SIZE],
 }
 
-fn get_box(rows: &[Group; SIZE], i: usize, j: usize) -> Cell {
-    let row = (i / ORDER) * ORDER + j / ORDER;
-    let col = (i % ORDER) * ORDER + j % ORDER;
-
-    rows[row][col]
+fn row_pos_to_box(i: usize, j: usize) -> (usize, usize) {
+    (
+        (i / ORDER) * ORDER + j / ORDER,
+        (i % ORDER) * ORDER + j % ORDER,
+    )
 }
 
 impl Grid {
@@ -55,7 +55,12 @@ impl Grid {
 
     pub fn from(rows: [Group; SIZE]) -> Grid {
         let cols = array::from_fn(|i| array::from_fn(|j| rows[j][i]));
-        let boxes = array::from_fn(|i| array::from_fn(|j| get_box(&rows, i, j)));
+        let boxes = array::from_fn(|i| {
+            array::from_fn(|j| {
+                let (box_i, box_j) = row_pos_to_box(i, j);
+                rows[box_i][box_j]
+            })
+        });
 
         Grid { rows, cols, boxes }
     }
