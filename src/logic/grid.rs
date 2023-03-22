@@ -1,22 +1,11 @@
 use super::{puzzle::CellCoord, Group, CELL_WIDTH, ORDER, SIZE};
 use std::{array, fmt};
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Cell {
     Given(u8),
     Filled(u8),
     Empty,
-}
-
-impl PartialEq for Cell {
-    fn eq(&self, other: &Self) -> bool {
-        match (self, other) {
-            (Self::Empty, Self::Empty) => true,
-            (Self::Filled(n), Self::Filled(m)) => n == m,
-            (Self::Given(n), Self::Given(m)) => n == m,
-            _ => false,
-        }
-    }
 }
 
 impl fmt::Display for Cell {
