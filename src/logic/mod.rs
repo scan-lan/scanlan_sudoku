@@ -7,10 +7,5 @@ pub use puzzle::Puzzle;
 
 type Group = [grid::Cell; SIZE];
 
-pub fn run() {
-    let p = Puzzle::new();
-    println!("{}", p.solution());
-}
-
 mod grid;
 mod puzzle;
