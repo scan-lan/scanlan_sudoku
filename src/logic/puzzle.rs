@@ -1,5 +1,10 @@
 use super::{get_base_solution, Grid, Group};
 
+pub struct CellCoord {
+    pub row: usize,
+    pub col: usize,
+}
+
 #[derive(Debug)]
 pub struct Puzzle {
     grid: Grid,

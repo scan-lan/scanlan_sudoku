@@ -1,4 +1,4 @@
-use super::{Group, CELL_WIDTH, ORDER, SIZE};
+use super::{puzzle::CellCoord, Group, CELL_WIDTH, ORDER, SIZE};
 use std::{array, fmt};
 
 #[derive(Clone, Copy, Debug)]
@@ -69,6 +69,14 @@ impl Grid {
         &self.rows
     }
 
+    pub fn cols(&self) -> &[Group; SIZE] {
+        &self.cols
+    }
+
+    pub fn boxes(&self) -> &[Group; SIZE] {
+        &self.boxes
+    }
+
     pub fn get_row(&self, idx: usize) -> &Group {
         &self.rows[idx]
     }
@@ -79,6 +87,10 @@ impl Grid {
 
     pub fn get_box(&self, idx: usize) -> &Group {
         &self.boxes[idx]
+    }
+
+    pub fn get_cell(&self, pos: CellCoord) -> &Cell {
+        &self.rows[pos.row][pos.col]
     }
 }
 
