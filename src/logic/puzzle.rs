@@ -8,14 +8,14 @@ pub struct CellCoord {
 #[derive(Debug)]
 pub struct Puzzle {
     grid: Grid,
-    solution: Grid,
+    solution: Option<Grid>,
 }
 
 impl Puzzle {
     pub fn new() -> Puzzle {
         Puzzle {
             grid: Grid::new(),
-            solution: Grid::from(get_base_solution()),
+            solution: Some(Grid::from(get_base_solution())),
         }
     }
 
@@ -23,8 +23,11 @@ impl Puzzle {
         format!("{}", self.grid)
     }
 
-    pub fn solution(&self) -> String {
-        format!("{}", self.solution)
+    pub fn solution(&self) -> Option<String> {
+        match &self.solution {
+            Some(s) => Some(format!("{}", s)),
+            None => None,
+        }
     }
 
     pub fn get_row(&self, idx: usize) -> &Group {
@@ -64,6 +67,6 @@ mod puzzle_tests {
         );
         let p = Puzzle::new();
 
-        assert_eq!(p.solution(), expected);
+        assert_eq!(p.solution(), Some(expected));
     }
 }
