@@ -26,13 +26,6 @@ pub struct Grid {
     boxes: [Group; SIZE],
 }
 
-fn row_pos_to_box(i: usize, j: usize) -> (usize, usize) {
-    (
-        (i / ORDER) * ORDER + j / ORDER,
-        (i % ORDER) * ORDER + j % ORDER,
-    )
-}
-
 impl Grid {
     pub fn new() -> Grid {
         Grid {
@@ -85,6 +78,13 @@ impl Grid {
     pub fn update(&mut self, pos: CellCoord, val: u8) {
         self.rows[pos.row][pos.col] = Cell::Filled(val);
     }
+}
+
+fn row_pos_to_box(i: usize, j: usize) -> (usize, usize) {
+    (
+        (i / ORDER) * ORDER + j / ORDER,
+        (i % ORDER) * ORDER + j % ORDER,
+    )
 }
 
 pub fn get_base_solution() -> [Group; SIZE] {
