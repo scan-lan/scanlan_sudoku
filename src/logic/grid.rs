@@ -92,6 +92,10 @@ impl Grid {
     pub fn get_cell(&self, pos: CellCoord) -> &Cell {
         &self.rows[pos.row][pos.col]
     }
+
+    pub fn update(&mut self, pos: CellCoord, val: u8) {
+        self.rows[pos.row][pos.col] = Cell::Filled(val);
+    }
 }
 
 pub fn get_base_solution() -> [Group; SIZE] {
@@ -131,4 +135,5 @@ impl fmt::Display for Grid {
     }
 }
 
+#[cfg(test)]
 mod grid_tests;

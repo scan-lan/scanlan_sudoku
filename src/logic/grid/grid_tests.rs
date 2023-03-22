@@ -1,5 +1,5 @@
-#[cfg(test)]
 use super::{get_base_solution, Cell, Grid, Group};
+use crate::logic::puzzle::CellCoord;
 
 #[test]
 fn get_row() {
@@ -7,6 +7,19 @@ fn get_row() {
     let g = Grid::from(get_base_solution());
 
     assert_eq!(g.get_row(0), &expected);
+}
+
+#[test]
+fn update_cell() {
+    let mut expected = get_base_solution();
+    expected[4][4] = Cell::Filled(1);
+    expected[4][5] = Cell::Filled(1);
+    let mut g = Grid::from(get_base_solution());
+
+    g.update(CellCoord { row: 4, col: 4 }, 1);
+    g.update(CellCoord { row: 4, col: 5 }, 1);
+
+    assert_eq!(g.rows(), &expected);
 }
 
 #[test]
