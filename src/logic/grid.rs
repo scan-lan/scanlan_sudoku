@@ -1,5 +1,5 @@
 use super::{puzzle::CellCoord, Group, CELL_WIDTH, ORDER, SIZE};
-use std::{array, fmt};
+use std::{array, collections::HashSet, fmt};
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Cell {
@@ -24,6 +24,7 @@ pub struct Grid {
     rows: [Group; SIZE],
     cols: [Group; SIZE],
     boxes: [Group; SIZE],
+    candidate_matrix: [[HashSet<u8>; SIZE]; SIZE],
 }
 
 impl Grid {
@@ -32,6 +33,7 @@ impl Grid {
             rows: [[Cell::Empty; SIZE]; SIZE],
             cols: [[Cell::Empty; SIZE]; SIZE],
             boxes: [[Cell::Empty; SIZE]; SIZE],
+            candidate_matrix: array::from_fn(|_| array::from_fn(|_| HashSet::with_capacity(SIZE))),
         }
     }
 
@@ -43,8 +45,22 @@ impl Grid {
                 rows[box_i][box_j]
             })
         });
+        let candidate_matrix = rows.map(|row| {
+            row.map(|cell| {
+                if let Cell::Given(n) = cell {
+                    HashSet::from([n])
+                } else {
+                    HashSet::with_capacity(SIZE)
+                }
+            })
+        });
 
-        Grid { rows, cols, boxes }
+        Grid {
+            rows,
+            cols,
+            boxes,
+            candidate_matrix,
+        }
     }
 
     pub fn rows(&self) -> &[Group; SIZE] {
@@ -57,6 +73,10 @@ impl Grid {
 
     pub fn boxes(&self) -> &[Group; SIZE] {
         &self.boxes
+    }
+
+    pub fn candidate_matrix(&self) -> &[[HashSet<u8>; SIZE]; SIZE] {
+        &self.candidate_matrix
     }
 
     pub fn get_row(&self, idx: usize) -> &Group {

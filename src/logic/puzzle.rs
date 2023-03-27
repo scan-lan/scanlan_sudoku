@@ -1,6 +1,4 @@
-use std::collections::HashSet;
-
-use super::{get_base_solution, grid::Cell, Grid, Group, SIZE};
+use super::{get_base_solution, Grid, Group};
 
 pub struct CellCoord {
     pub row: usize,
@@ -11,7 +9,6 @@ pub struct CellCoord {
 pub struct Puzzle {
     grid: Grid,
     solution: Option<Grid>,
-    candidate_matrix: [[HashSet<u8>; SIZE]; SIZE],
 }
 
 impl Puzzle {
@@ -19,15 +16,6 @@ impl Puzzle {
         Puzzle {
             grid: Grid::new(),
             solution: Some(Grid::from(get_base_solution())),
-            candidate_matrix: get_base_solution().map(|row| {
-                row.map(|cell| {
-                    if let Cell::Given(n) = cell {
-                        HashSet::from([n])
-                    } else {
-                        HashSet::with_capacity(SIZE)
-                    }
-                })
-            }),
         }
     }
 
@@ -49,9 +37,8 @@ impl Puzzle {
 
 #[cfg(test)]
 mod puzzle_tests {
-    use std::collections::HashSet;
 
-    use crate::logic::{get_base_solution, grid::Cell, SIZE};
+    use crate::logic::{grid::Cell, SIZE};
 
     use super::Puzzle;
 
@@ -82,18 +69,5 @@ mod puzzle_tests {
         let p = Puzzle::new();
 
         assert_eq!(p.solution(), Some(expected));
-    }
-
-    #[test]
-    fn candidate_matrix_correct_for_from() {
-        let expected = get_base_solution().map(|row| {
-            row.map(|cell| match cell {
-                Cell::Given(n) => HashSet::from([n]),
-                _ => HashSet::with_capacity(SIZE),
-            })
-        });
-        let p = Puzzle::new();
-
-        assert_eq!(expected, p.candidate_matrix);
     }
 }

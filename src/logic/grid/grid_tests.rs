@@ -1,5 +1,7 @@
+use std::collections::HashSet;
+
 use super::{get_base_solution, Cell, Grid, Group};
-use crate::logic::puzzle::CellCoord;
+use crate::logic::{puzzle::CellCoord, SIZE};
 
 #[test]
 fn get_row() {
@@ -20,6 +22,19 @@ fn update_cell() {
     g.update(CellCoord { row: 4, col: 5 }, 1);
 
     assert_eq!(g.rows(), &expected);
+}
+
+#[test]
+fn candidate_matrix_correct_for_from() {
+    let expected = get_base_solution().map(|row| {
+        row.map(|cell| match cell {
+            Cell::Given(n) => HashSet::from([n]),
+            _ => HashSet::with_capacity(SIZE),
+        })
+    });
+    let g = Grid::from(get_base_solution());
+
+    assert_eq!(expected, g.candidate_matrix);
 }
 
 #[test]
