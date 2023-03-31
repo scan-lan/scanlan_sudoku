@@ -24,10 +24,7 @@ impl Puzzle {
     }
 
     pub fn solution(&self) -> Option<String> {
-        match &self.solution {
-            Some(s) => Some(format!("{}", s)),
-            None => None,
-        }
+        self.solution.as_ref().map(|s| format!("{}", s))
     }
 
     pub fn get_row(&self, idx: usize) -> &Group {

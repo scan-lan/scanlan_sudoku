@@ -100,6 +100,12 @@ impl Grid {
     }
 }
 
+impl Default for Grid {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 fn row_pos_to_box(i: usize, j: usize) -> (usize, usize) {
     (
         (i / ORDER) * ORDER + j / ORDER,
@@ -108,15 +114,9 @@ fn row_pos_to_box(i: usize, j: usize) -> (usize, usize) {
 }
 
 pub fn get_base_solution() -> [Group; SIZE] {
-    let mut base_solution = [[Cell::Empty; SIZE]; SIZE];
-    for i in 0..SIZE {
-        for j in 0..SIZE {
-            base_solution[i][j] =
-                Cell::Given((1 + (j + (i / ORDER) + (i % ORDER) * ORDER) % SIZE) as u8);
-        }
-    }
-
-    base_solution
+    array::from_fn(|i| {
+        array::from_fn(|j| Cell::Given((1 + (j + (i / ORDER) + (i % ORDER) * ORDER) % SIZE) as u8))
+    })
 }
 
 impl fmt::Display for Grid {
@@ -131,7 +131,7 @@ impl fmt::Display for Grid {
                     write!(f, "{:>cell_width$}", "|")?;
                 }
             }
-            write!(f, "\n")?;
+            writeln!(f)?;
             if i != SIZE - 1 && i % ORDER == ORDER - 1 {
                 let line = format!("{:->box_width$}", "-");
                 for _ in 1..ORDER {
