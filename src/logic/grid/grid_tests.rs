@@ -1,7 +1,25 @@
 use std::collections::HashSet;
 
-use super::{get_base_solution, Cell, Grid, Group};
-use crate::logic::{puzzle::CellCoord, SIZE};
+use super::{get_base_solution, get_box_containing, Cell, Grid, Group};
+use crate::logic::{grid_trait::GridTrait, puzzle::CellCoord, SIZE};
+
+#[test]
+fn get_box_containing_returns_correct_coords() {
+    let c: CellCoord = (0, 0).into();
+    let expected: [CellCoord; SIZE] = [
+        (0, 0).into(),
+        (0, 1).into(),
+        (0, 2).into(),
+        (1, 0).into(),
+        (1, 1).into(),
+        (1, 2).into(),
+        (2, 0).into(),
+        (2, 1).into(),
+        (2, 2).into(),
+    ];
+
+    assert_eq!(get_box_containing(c), expected);
+}
 
 #[test]
 fn get_row() {

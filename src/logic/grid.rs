@@ -98,7 +98,7 @@ impl Grid {
     pub fn update(&mut self, pos: CellCoord, val: u8) {
         self.rows[pos.row][pos.col] = Cell::Filled(val);
         self.cols[pos.col][pos.row] = Cell::Filled(val);
-        let (box_row, box_col) = row_coords_to_box_coords(pos.row, pos.col);
+        let (box_row, box_col) = row_coords_to_box_coords(pos).into();
         self.boxes[box_row][box_col] = Cell::Filled(val);
     }
 }
@@ -109,11 +109,19 @@ impl Default for Grid {
     }
 }
 
-fn row_coords_to_box_coords(i: usize, j: usize) -> (usize, usize) {
+pub fn row_coords_to_box_coords(cell: CellCoord) -> CellCoord {
+    let (row, col) = cell.into();
     (
-        (i / ORDER) * ORDER + j / ORDER,
-        (i % ORDER) * ORDER + j % ORDER,
+        (row / ORDER) * ORDER + col / ORDER,
+        (row % ORDER) * ORDER + col % ORDER,
     )
+        .into()
+}
+
+pub fn get_box_containing(cell: CellCoord) -> [CellCoord; SIZE] {
+    let (row, col) = cell.into();
+    let (row_offset, col_offset) = ((row / ORDER) * ORDER, (col / ORDER) * ORDER);
+    array::from_fn(|i| (row_offset + i / ORDER, col_offset + i % ORDER).into())
 }
 
 pub fn get_base_solution() -> [Group; SIZE] {
