@@ -97,6 +97,9 @@ impl Grid {
 
     pub fn update(&mut self, pos: CellCoord, val: u8) {
         self.rows[pos.row][pos.col] = Cell::Filled(val);
+        self.cols[pos.col][pos.row] = Cell::Filled(val);
+        let (box_row, box_col) = row_coords_to_box_coords(pos.row, pos.col);
+        self.boxes[box_row][box_col] = Cell::Filled(val);
     }
 }
 

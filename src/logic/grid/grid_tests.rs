@@ -25,6 +25,18 @@ fn update_cell() {
 }
 
 #[test]
+fn update_keeps_all_groups_synced() {
+    let mut g = Grid::from(get_base_solution());
+    g.update(CellCoord { row: 1, col: 1 }, 1);
+    g.update(CellCoord { row: 2, col: 3 }, 9);
+
+    assert_eq!(g.rows[1][1], g.cols[1][1]);
+    assert_eq!(g.cols[1][1], g.boxes[0][4]);
+    assert_eq!(g.rows[2][3], g.cols[3][2]);
+    assert_eq!(g.cols[3][2], g.boxes[1][6]);
+}
+
+#[test]
 fn candidate_matrix_correct_for_from() {
     let expected = get_base_solution().map(|row| {
         row.map(|cell| match cell {
