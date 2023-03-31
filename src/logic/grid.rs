@@ -41,7 +41,7 @@ impl Grid {
         let cols = array::from_fn(|i| array::from_fn(|j| rows[j][i]));
         let boxes = array::from_fn(|i| {
             array::from_fn(|j| {
-                let (box_i, box_j) = row_pos_to_box(i, j);
+                let (box_i, box_j) = row_coords_to_box_coords(i, j);
                 rows[box_i][box_j]
             })
         });
@@ -106,7 +106,7 @@ impl Default for Grid {
     }
 }
 
-fn row_pos_to_box(i: usize, j: usize) -> (usize, usize) {
+fn row_coords_to_box_coords(i: usize, j: usize) -> (usize, usize) {
     (
         (i / ORDER) * ORDER + j / ORDER,
         (i % ORDER) * ORDER + j % ORDER,
