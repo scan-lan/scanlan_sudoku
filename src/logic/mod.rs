@@ -8,4 +8,5 @@ pub use puzzle::Puzzle;
 type Group = [grid::Cell; SIZE];
 
 mod grid;
+mod grid_trait;
 mod puzzle;

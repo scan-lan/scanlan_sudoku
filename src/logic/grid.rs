@@ -1,4 +1,4 @@
-use super::{puzzle::CellCoord, Group, CELL_WIDTH, ORDER, SIZE};
+use super::{grid_trait::GridTrait, puzzle::CellCoord, Group, CELL_WIDTH, ORDER, SIZE};
 use std::{array, collections::HashSet, fmt};
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -38,13 +38,8 @@ impl Grid {
     }
 
     pub fn from(rows: [Group; SIZE]) -> Grid {
-        let cols = array::from_fn(|i| array::from_fn(|j| rows[j][i]));
-        let boxes = array::from_fn(|i| {
-            array::from_fn(|j| {
-                let (box_i, box_j) = row_coords_to_box_coords(i, j);
-                rows[box_i][box_j]
-            })
-        });
+        let cols = rows.cols();
+        let boxes = rows.boxes();
         let candidate_matrix = rows.map(|row| {
             row.map(|cell| {
                 if let Cell::Given(n) = cell {
