@@ -29,11 +29,14 @@ pub struct Grid {
 
 impl Grid {
     pub fn new() -> Grid {
+        let mut c_matrix = HashSet::from(array::from_fn::<u8, SIZE, _>(|i| (i + 1) as u8));
+        c_matrix.shrink_to(SIZE);
+
         Grid {
             rows: [[Cell::Empty; SIZE]; SIZE],
             cols: [[Cell::Empty; SIZE]; SIZE],
             boxes: [[Cell::Empty; SIZE]; SIZE],
-            candidate_matrix: array::from_fn(|_| array::from_fn(|_| HashSet::with_capacity(SIZE))),
+            candidate_matrix: array::from_fn(|_| array::from_fn(|_| c_matrix.clone())),
         }
     }
 
@@ -90,11 +93,29 @@ impl Grid {
         &self.rows[pos.row][pos.col]
     }
 
+    fn update_candidates(&mut self, pos: CellCoord, val: u8) {
+        self.candidate_matrix[pos.row]
+            .iter_mut()
+            .for_each(|candidates| {
+                candidates.remove(&val);
+            });
+
+        self.candidate_matrix.iter_mut().for_each(|row| {
+            row[pos.col].remove(&val);
+        });
+
+        get_box_containing(pos).into_iter().for_each(|coord| {
+            let (row, col) = coord.into();
+            self.candidate_matrix[row][col].remove(&val);
+        })
+    }
+
     pub fn update(&mut self, pos: CellCoord, val: u8) {
         self.rows[pos.row][pos.col] = Cell::Filled(val);
         self.cols[pos.col][pos.row] = Cell::Filled(val);
         let (box_row, box_col) = row_coords_to_box_coords(pos).into();
         self.boxes[box_row][box_col] = Cell::Filled(val);
+        self.update_candidates(pos, val);
     }
 }
 

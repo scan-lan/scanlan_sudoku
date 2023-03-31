@@ -68,6 +68,20 @@ fn candidate_matrix_correct_for_from() {
 }
 
 #[test]
+fn update_gives_correct_candidate_matrix() {
+    let mut g = Grid::new();
+    g.update(CellCoord { row: 4, col: 5 }, 9);
+
+    assert!(g.candidate_matrix[4]
+        .iter()
+        .all(|candidates| !candidates.contains(&9)));
+    assert!(g.candidate_matrix.iter().all(|row| !row[5].contains(&9)));
+    assert!(g.candidate_matrix.boxes()[4]
+        .iter()
+        .all(|candidates| !candidates.contains(&9)))
+}
+
+#[test]
 fn from_returns_correct_vals() {
     let expected_rows = [
         [
