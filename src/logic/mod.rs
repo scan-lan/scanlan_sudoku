@@ -10,3 +10,4 @@ type Group = [grid::Cell; SIZE];
 mod grid;
 mod grid_trait;
 mod puzzle;
+mod solver;
