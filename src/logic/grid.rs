@@ -25,6 +25,7 @@ pub struct Grid {
     cols: [Group; SIZE],
     boxes: [Group; SIZE],
     candidate_matrix: [[HashSet<u8>; SIZE]; SIZE],
+    pub empty_cell_count: u8,
 }
 
 impl Grid {
@@ -37,6 +38,7 @@ impl Grid {
             cols: [[Cell::Empty; SIZE]; SIZE],
             boxes: [[Cell::Empty; SIZE]; SIZE],
             candidate_matrix: array::from_fn(|_| array::from_fn(|_| c_matrix.clone())),
+            empty_cell_count: SIZE.pow(2) as u8,
         }
     }
 
@@ -52,12 +54,17 @@ impl Grid {
                 }
             })
         });
+        let empty_cell_count = rows.iter().fold(0u8, |mut acc, row| {
+            acc += row.iter().filter(|c| c == &&Cell::Empty).count() as u8;
+            acc
+        });
 
         Grid {
             rows,
             cols,
             boxes,
             candidate_matrix,
+            empty_cell_count,
         }
     }
 
@@ -110,12 +117,18 @@ impl Grid {
         })
     }
 
-    pub fn update(&mut self, pos: CellCoord, val: u8) {
+    pub fn update(&mut self, pos: CellCoord, val: u8) -> Result<(), GridError> {
+        if let Cell::Given(_) = self.get_cell(pos) {
+            return Err(GridError::new(ErrorKind::InvalidUpdate, pos, val));
+        } else if let Cell::Empty = self.get_cell(pos) {
+            self.empty_cell_count -= 1;
+        }
         self.rows[pos.row][pos.col] = Cell::Filled(val);
         self.cols[pos.col][pos.row] = Cell::Filled(val);
         let (box_row, box_col) = row_coords_to_box_coords(pos).into();
         self.boxes[box_row][box_col] = Cell::Filled(val);
         self.update_candidates(pos, val);
+        Ok(())
     }
 }
 
@@ -123,6 +136,42 @@ impl Default for Grid {
     fn default() -> Self {
         Self::new()
     }
+}
+
+#[derive(Debug)]
+pub struct GridError {
+    details: String,
+}
+
+impl GridError {
+    fn new(kind: ErrorKind, pos: CellCoord, val: u8) -> Self {
+        let details = match kind {
+            ErrorKind::InvalidUpdate => format!(
+                "failed to update cell at ({row}, {col}) with value {val} because it's a clue",
+                row = pos.row,
+                col = pos.col,
+            ),
+        };
+
+        GridError { details }
+    }
+}
+
+impl fmt::Display for GridError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "{}", self.details)
+    }
+}
+
+impl std::error::Error for GridError {
+    fn description(&self) -> &str {
+        &self.details
+    }
+}
+
+#[derive(Debug)]
+enum ErrorKind {
+    InvalidUpdate,
 }
 
 pub fn row_coords_to_box_coords(cell: CellCoord) -> CellCoord {

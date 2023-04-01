@@ -31,22 +31,22 @@ fn get_row() {
 
 #[test]
 fn update_cell() {
-    let mut expected = get_base_solution();
+    let mut expected = [[Cell::Empty; SIZE]; SIZE];
     expected[4][4] = Cell::Filled(1);
     expected[4][5] = Cell::Filled(1);
-    let mut g = Grid::from(get_base_solution());
+    let mut g = Grid::new();
 
-    g.update(CellCoord { row: 4, col: 4 }, 1);
-    g.update(CellCoord { row: 4, col: 5 }, 1);
+    g.update(CellCoord { row: 4, col: 4 }, 1).unwrap();
+    g.update(CellCoord { row: 4, col: 5 }, 1).unwrap();
 
     assert_eq!(g.rows(), &expected);
 }
 
 #[test]
 fn update_keeps_all_groups_synced() {
-    let mut g = Grid::from(get_base_solution());
-    g.update(CellCoord { row: 1, col: 1 }, 1);
-    g.update(CellCoord { row: 2, col: 3 }, 9);
+    let mut g = Grid::new();
+    g.update(CellCoord { row: 1, col: 1 }, 1).unwrap();
+    g.update(CellCoord { row: 2, col: 3 }, 9).unwrap();
 
     assert_eq!(g.rows[1][1], g.cols[1][1]);
     assert_eq!(g.cols[1][1], g.boxes[0][4]);
@@ -70,7 +70,7 @@ fn candidate_matrix_correct_for_from() {
 #[test]
 fn update_gives_correct_candidate_matrix() {
     let mut g = Grid::new();
-    g.update(CellCoord { row: 4, col: 5 }, 9);
+    g.update(CellCoord { row: 4, col: 5 }, 9).unwrap();
 
     assert!(g.candidate_matrix[4]
         .iter()
@@ -79,6 +79,25 @@ fn update_gives_correct_candidate_matrix() {
     assert!(g.candidate_matrix.boxes()[4]
         .iter()
         .all(|candidates| !candidates.contains(&9)))
+}
+
+#[test]
+fn empty_cell_count_correct_after_from() {
+    let mut rows = get_base_solution();
+    for cell in rows.iter_mut().flatten().take(5) {
+        *cell = Cell::Empty;
+    }
+    let g = Grid::from(rows);
+
+    assert_eq!(g.empty_cell_count, 5);
+}
+
+#[test]
+fn empty_cell_count_correct_after_update() {
+    let mut g = Grid::new();
+    g.update((0, 0).into(), 9).unwrap();
+
+    assert_eq!(g.empty_cell_count, 80);
 }
 
 #[test]
