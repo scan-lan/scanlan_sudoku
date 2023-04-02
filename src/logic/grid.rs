@@ -19,7 +19,7 @@ impl fmt::Display for Cell {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Grid {
     rows: [Group; SIZE],
     cols: [Group; SIZE],
@@ -131,6 +131,15 @@ impl Grid {
         self.boxes[box_row][box_col] = Cell::Filled(val);
         self.update_candidates(cell, val);
         Ok(())
+    }
+
+    pub fn collapse(&mut self, cell: Coord) -> u8 {
+        let val = *self.candidate_matrix[cell.row][cell.col]
+            .iter()
+            .next()
+            .expect("don't call collapse on a cell with 0 candidates");
+
+        val
     }
 }
 
