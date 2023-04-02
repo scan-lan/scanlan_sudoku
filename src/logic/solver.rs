@@ -1,14 +1,14 @@
-use super::{puzzle::CellCoord, Grid};
+use super::{puzzle::Coord, Grid};
 
-fn get_min_candidates_cell(g: &Grid) -> CellCoord {
-    let mut coords = CellCoord { row: 0, col: 0 };
+fn get_min_candidates_cell(g: &Grid) -> Coord {
+    let mut coords = Coord { row: 0, col: 0 };
     let mut min = usize::MAX;
 
     for (i, row) in g.candidate_matrix().iter().enumerate() {
         for (j, candidates) in row.iter().enumerate() {
             if candidates.len() < min {
                 min = candidates.len();
-                coords = CellCoord { row: i, col: j };
+                coords = Coord { row: i, col: j };
             }
         }
     }

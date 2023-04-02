@@ -1,12 +1,12 @@
 use std::collections::HashSet;
 
-use super::{get_base_solution, get_box_containing, Cell, Grid, Group};
-use crate::logic::{grid_trait::GridTrait, puzzle::CellCoord, SIZE};
+use super::{get_base_solution, get_box_coords_containing, Cell, Grid, Group};
+use crate::logic::{grid_trait::GridTrait, puzzle::Coord, SIZE};
 
 #[test]
 fn get_box_containing_returns_correct_coords() {
-    let c: CellCoord = (0, 0).into();
-    let expected: [CellCoord; SIZE] = [
+    let c: Coord = (0, 0).into();
+    let expected: [Coord; SIZE] = [
         (0, 0).into(),
         (0, 1).into(),
         (0, 2).into(),
@@ -18,7 +18,7 @@ fn get_box_containing_returns_correct_coords() {
         (2, 2).into(),
     ];
 
-    assert_eq!(get_box_containing(c), expected);
+    assert_eq!(get_box_coords_containing(c), expected);
 }
 
 #[test]
@@ -36,8 +36,8 @@ fn update_cell() {
     expected[4][5] = Cell::Filled(1);
     let mut g = Grid::new();
 
-    g.update(CellCoord { row: 4, col: 4 }, 1).unwrap();
-    g.update(CellCoord { row: 4, col: 5 }, 1).unwrap();
+    g.update(Coord { row: 4, col: 4 }, 1).unwrap();
+    g.update(Coord { row: 4, col: 5 }, 1).unwrap();
 
     assert_eq!(g.rows(), &expected);
 }
@@ -45,8 +45,8 @@ fn update_cell() {
 #[test]
 fn update_keeps_all_groups_synced() {
     let mut g = Grid::new();
-    g.update(CellCoord { row: 1, col: 1 }, 1).unwrap();
-    g.update(CellCoord { row: 2, col: 3 }, 9).unwrap();
+    g.update(Coord { row: 1, col: 1 }, 1).unwrap();
+    g.update(Coord { row: 2, col: 3 }, 9).unwrap();
 
     assert_eq!(g.rows[1][1], g.cols[1][1]);
     assert_eq!(g.cols[1][1], g.boxes[0][4]);
@@ -70,7 +70,7 @@ fn candidate_matrix_correct_for_from() {
 #[test]
 fn update_gives_correct_candidate_matrix() {
     let mut g = Grid::new();
-    g.update(CellCoord { row: 4, col: 5 }, 9).unwrap();
+    g.update(Coord { row: 4, col: 5 }, 9).unwrap();
 
     assert!(g.candidate_matrix[4]
         .iter()

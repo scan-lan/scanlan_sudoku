@@ -1,4 +1,4 @@
-use super::{grid_trait::GridTrait, puzzle::CellCoord, Group, CELL_WIDTH, ORDER, SIZE};
+use super::{grid_trait::GridTrait, puzzle::Coord, Group, CELL_WIDTH, ORDER, SIZE};
 use std::{array, collections::HashSet, fmt};
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -96,38 +96,40 @@ impl Grid {
         &self.boxes[idx]
     }
 
-    pub fn get_cell(&self, pos: CellCoord) -> &Cell {
-        &self.rows[pos.row][pos.col]
+    pub fn get_cell(&self, cell: Coord) -> &Cell {
+        &self.rows[cell.row][cell.col]
     }
 
-    fn update_candidates(&mut self, pos: CellCoord, val: u8) {
-        self.candidate_matrix[pos.row]
+    fn update_candidates(&mut self, cell: Coord, val: u8) {
+        self.candidate_matrix[cell.row]
             .iter_mut()
             .for_each(|candidates| {
                 candidates.remove(&val);
             });
 
         self.candidate_matrix.iter_mut().for_each(|row| {
-            row[pos.col].remove(&val);
+            row[cell.col].remove(&val);
         });
 
-        get_box_containing(pos).into_iter().for_each(|coord| {
-            let (row, col) = coord.into();
-            self.candidate_matrix[row][col].remove(&val);
-        })
+        get_box_coords_containing(cell)
+            .into_iter()
+            .for_each(|coord| {
+                let (row, col) = coord.into();
+                self.candidate_matrix[row][col].remove(&val);
+            })
     }
 
-    pub fn update(&mut self, pos: CellCoord, val: u8) -> Result<(), GridError> {
-        if let Cell::Given(_) = self.get_cell(pos) {
-            return Err(GridError::new(ErrorKind::InvalidUpdate, pos, val));
-        } else if let Cell::Empty = self.get_cell(pos) {
+    pub fn update(&mut self, cell: Coord, val: u8) -> Result<(), GridError> {
+        if let Cell::Given(_) = self.get_cell(cell) {
+            return Err(GridError::new(ErrorKind::InvalidUpdate, cell, val));
+        } else if let Cell::Empty = self.get_cell(cell) {
             self.empty_cell_count -= 1;
         }
-        self.rows[pos.row][pos.col] = Cell::Filled(val);
-        self.cols[pos.col][pos.row] = Cell::Filled(val);
-        let (box_row, box_col) = row_coords_to_box_coords(pos).into();
+        self.rows[cell.row][cell.col] = Cell::Filled(val);
+        self.cols[cell.col][cell.row] = Cell::Filled(val);
+        let (box_row, box_col) = row_coords_to_box_coords(cell).into();
         self.boxes[box_row][box_col] = Cell::Filled(val);
-        self.update_candidates(pos, val);
+        self.update_candidates(cell, val);
         Ok(())
     }
 }
@@ -144,12 +146,12 @@ pub struct GridError {
 }
 
 impl GridError {
-    fn new(kind: ErrorKind, pos: CellCoord, val: u8) -> Self {
+    fn new(kind: ErrorKind, cell: Coord, val: u8) -> Self {
         let details = match kind {
             ErrorKind::InvalidUpdate => format!(
                 "failed to update cell at ({row}, {col}) with value {val} because it's a clue",
-                row = pos.row,
-                col = pos.col,
+                row = cell.row,
+                col = cell.col,
             ),
         };
 
@@ -174,7 +176,7 @@ enum ErrorKind {
     InvalidUpdate,
 }
 
-pub fn row_coords_to_box_coords(cell: CellCoord) -> CellCoord {
+pub fn row_coords_to_box_coords(cell: Coord) -> Coord {
     let (row, col) = cell.into();
     (
         (row / ORDER) * ORDER + col / ORDER,
@@ -183,7 +185,7 @@ pub fn row_coords_to_box_coords(cell: CellCoord) -> CellCoord {
         .into()
 }
 
-pub fn get_box_containing(cell: CellCoord) -> [CellCoord; SIZE] {
+pub fn get_box_coords_containing(cell: Coord) -> [Coord; SIZE] {
     let (row, col) = cell.into();
     let (row_offset, col_offset) = ((row / ORDER) * ORDER, (col / ORDER) * ORDER);
     array::from_fn(|i| (row_offset + i / ORDER, col_offset + i % ORDER).into())

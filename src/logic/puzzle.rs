@@ -1,19 +1,19 @@
 use super::{get_base_solution, Grid, Group};
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
-pub struct CellCoord {
+pub struct Coord {
     pub row: usize,
     pub col: usize,
 }
 
-impl From<(usize, usize)> for CellCoord {
+impl From<(usize, usize)> for Coord {
     fn from((row, col): (usize, usize)) -> Self {
-        CellCoord { row, col }
+        Coord { row, col }
     }
 }
 
-impl From<CellCoord> for (usize, usize) {
-    fn from(c: CellCoord) -> Self {
+impl From<Coord> for (usize, usize) {
+    fn from(c: Coord) -> Self {
         (c.row, c.col)
     }
 }
