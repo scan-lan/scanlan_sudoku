@@ -3,11 +3,15 @@ pub const SIZE: usize = ORDER.pow(2);
 const CELL_WIDTH: u32 = SIZE.ilog10() + 2;
 
 pub use grid::{get_base_solution, Cell, Grid};
-pub use puzzle::Puzzle;
+pub use grid_trait::DisplayableGrid;
+pub use puzzle::{Coord, Puzzle};
+pub use types::Move;
 
 type Group = [grid::Cell; SIZE];
 
+mod candidate_matrix;
 mod grid;
 mod grid_trait;
 mod puzzle;
 mod solver;
+mod types;

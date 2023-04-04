@@ -1,5 +1,10 @@
-use super::{grid_trait::GridTrait, puzzle::Coord, Group, CELL_WIDTH, ORDER, SIZE};
-use std::{array, collections::HashSet, fmt};
+use super::{
+    candidate_matrix::CandidateMatrix,
+    grid_trait::{DisplayableGrid, GridTrait},
+    puzzle::Coord,
+    Group, CELL_WIDTH, ORDER, SIZE,
+};
+use std::{array, fmt};
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Cell {
@@ -12,7 +17,13 @@ impl fmt::Display for Cell {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let width = usize::try_from(CELL_WIDTH).expect("cell width should always be small");
         match self {
-            Self::Given(n) => write!(f, "{:width$}", n),
+            Self::Given(n) => {
+                if n == &0 {
+                    write!(f, "{:width$}", '?')
+                } else {
+                    write!(f, "{:width$}", n)
+                }
+            }
             Self::Filled(n) => write!(f, "{:width$}", n),
             Self::Empty => write!(f, "{:width$}", " "),
         }
@@ -24,20 +35,17 @@ pub struct Grid {
     rows: [Group; SIZE],
     cols: [Group; SIZE],
     boxes: [Group; SIZE],
-    candidate_matrix: [[HashSet<u8>; SIZE]; SIZE],
+    candidate_matrix: CandidateMatrix,
     pub empty_cell_count: u8,
 }
 
 impl Grid {
     pub fn new() -> Grid {
-        let mut c_matrix = HashSet::from(array::from_fn::<u8, SIZE, _>(|i| (i + 1) as u8));
-        c_matrix.shrink_to(SIZE);
-
         Grid {
             rows: [[Cell::Empty; SIZE]; SIZE],
             cols: [[Cell::Empty; SIZE]; SIZE],
             boxes: [[Cell::Empty; SIZE]; SIZE],
-            candidate_matrix: array::from_fn(|_| array::from_fn(|_| c_matrix.clone())),
+            candidate_matrix: CandidateMatrix::new(),
             empty_cell_count: SIZE.pow(2) as u8,
         }
     }
@@ -45,15 +53,6 @@ impl Grid {
     pub fn from(rows: [Group; SIZE]) -> Grid {
         let cols = rows.cols();
         let boxes = rows.boxes();
-        let candidate_matrix = rows.map(|row| {
-            row.map(|cell| {
-                if let Cell::Given(n) = cell {
-                    HashSet::from([n])
-                } else {
-                    HashSet::with_capacity(SIZE)
-                }
-            })
-        });
         let empty_cell_count = rows.iter().fold(0u8, |mut acc, row| {
             acc += row.iter().filter(|c| c == &&Cell::Empty).count() as u8;
             acc
@@ -63,7 +62,7 @@ impl Grid {
             rows,
             cols,
             boxes,
-            candidate_matrix,
+            candidate_matrix: rows.into(),
             empty_cell_count,
         }
     }
@@ -80,7 +79,7 @@ impl Grid {
         &self.boxes
     }
 
-    pub fn candidate_matrix(&self) -> &[[HashSet<u8>; SIZE]; SIZE] {
+    pub fn candidate_matrix(&self) -> &CandidateMatrix {
         &self.candidate_matrix
     }
 
@@ -100,46 +99,57 @@ impl Grid {
         &self.rows[cell.row][cell.col]
     }
 
-    fn update_candidates(&mut self, cell: Coord, val: u8) {
-        self.candidate_matrix[cell.row]
-            .iter_mut()
-            .for_each(|candidates| {
-                candidates.remove(&val);
-            });
-
-        self.candidate_matrix.iter_mut().for_each(|row| {
-            row[cell.col].remove(&val);
-        });
-
-        get_box_coords_containing(cell)
-            .into_iter()
-            .for_each(|coord| {
-                let (row, col) = coord.into();
-                self.candidate_matrix[row][col].remove(&val);
-            })
+    pub fn clear(&mut self, cell: Coord) -> Result<(), GridError> {
+        let (row, col) = cell.into();
+        match self.rows[row][col] {
+            Cell::Empty => Ok(()),
+            Cell::Given(_) => Err(GridError::new(ErrorKind::ClearedClue, cell, 0)),
+            Cell::Filled(_) => {
+                let (box_row, box_col) = row_coords_to_box_coords(cell).into();
+                self.rows[row][col] = Cell::Empty;
+                self.cols[col][row] = Cell::Empty;
+                self.boxes[box_row][box_col] = Cell::Empty;
+                Ok(())
+            }
+        }
     }
 
     pub fn update(&mut self, cell: Coord, val: u8) -> Result<(), GridError> {
         if let Cell::Given(_) = self.get_cell(cell) {
-            return Err(GridError::new(ErrorKind::InvalidUpdate, cell, val));
+            return Err(GridError::new(ErrorKind::UpdatedClue, cell, val));
         } else if let Cell::Empty = self.get_cell(cell) {
             self.empty_cell_count -= 1;
         }
+
         self.rows[cell.row][cell.col] = Cell::Filled(val);
         self.cols[cell.col][cell.row] = Cell::Filled(val);
         let (box_row, box_col) = row_coords_to_box_coords(cell).into();
         self.boxes[box_row][box_col] = Cell::Filled(val);
-        self.update_candidates(cell, val);
-        Ok(())
+
+        // Creates a copy of candidate matrix in case the update is invalid
+        let cm_backup = self.candidate_matrix.clone();
+        let result = self
+            .candidate_matrix
+            .update_candidates(cell, val)
+            .map_err(|_| GridError::new(ErrorKind::ZeroCandidates, cell, val));
+
+        if let Err(_) = result {
+            // Revert to the copied version
+            self.candidate_matrix = cm_backup;
+        }
+        result
     }
 
     pub fn collapse(&mut self, cell: Coord) -> u8 {
-        let val = *self.candidate_matrix[cell.row][cell.col]
-            .iter()
-            .next()
-            .expect("don't call collapse on a cell with 0 candidates");
+        self.candidate_matrix.collapse(cell)
+    }
 
-        val
+    pub fn remove_candidate(&mut self, cell: Coord, val: u8) -> bool {
+        self.candidate_matrix.remove_candidate(cell, val)
+    }
+
+    pub fn get_min_candidates_cell(&self) -> Coord {
+        self.candidate_matrix.get_min_candidates_cell()
     }
 }
 
@@ -152,19 +162,24 @@ impl Default for Grid {
 #[derive(Debug)]
 pub struct GridError {
     details: String,
+    pub kind: ErrorKind,
 }
 
 impl GridError {
     fn new(kind: ErrorKind, cell: Coord, val: u8) -> Self {
         let details = match kind {
-            ErrorKind::InvalidUpdate => format!(
-                "failed to update cell at ({row}, {col}) with value {val} because it's a clue",
-                row = cell.row,
-                col = cell.col,
+            ErrorKind::ClearedClue => format!(
+                "failed to clear cell at {cell} because it's a clue",
             ),
+            ErrorKind::UpdatedClue => format!(
+                "failed to update cell at {cell} with value `{val}` because it's a clue",
+            ),
+            ErrorKind::ZeroCandidates => format!(
+                "updating cell {cell} with value `{val}` resulted in a cell having zero candidate values"
+            )
         };
 
-        GridError { details }
+        GridError { details, kind }
     }
 }
 
@@ -181,8 +196,10 @@ impl std::error::Error for GridError {
 }
 
 #[derive(Debug)]
-enum ErrorKind {
-    InvalidUpdate,
+pub enum ErrorKind {
+    ClearedClue,
+    UpdatedClue,
+    ZeroCandidates,
 }
 
 pub fn row_coords_to_box_coords(cell: Coord) -> Coord {
@@ -208,25 +225,8 @@ pub fn get_base_solution() -> [Group; SIZE] {
 
 impl fmt::Display for Grid {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let cell_width = usize::try_from(CELL_WIDTH).expect("cell width should always be small");
-        let box_width: usize = cell_width * ORDER + cell_width - 1;
-
-        for (i, row) in self.rows.iter().enumerate() {
-            for (j, cell) in row.iter().enumerate() {
-                write!(f, "{:>cell_width$}", cell)?;
-                if j != SIZE - 1 && j % ORDER == ORDER - 1 {
-                    write!(f, "{:>cell_width$}", "|")?;
-                }
-            }
-            writeln!(f)?;
-            if i != SIZE - 1 && i % ORDER == ORDER - 1 {
-                let line = format!("{:->box_width$}", "-");
-                for _ in 1..ORDER {
-                    write!(f, "{line}+")?;
-                }
-                writeln!(f, "{line}")?;
-            }
-        }
+        let g = DisplayableGrid(self.rows);
+        write!(f, "{g}")?;
         Ok(())
     }
 }

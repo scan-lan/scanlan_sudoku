@@ -1,9 +1,17 @@
+use std::fmt;
+
 use super::{get_base_solution, Grid, Group};
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub struct Coord {
     pub row: usize,
     pub col: usize,
+}
+
+impl fmt::Display for Coord {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "({}, {})", self.row, self.col)
+    }
 }
 
 impl From<(usize, usize)> for Coord {
