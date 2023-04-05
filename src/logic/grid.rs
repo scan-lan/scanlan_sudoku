@@ -166,6 +166,10 @@ impl Grid {
     pub fn get_min_candidates_cell(&self) -> Coord {
         self.candidate_matrix.get_min_candidates_cell()
     }
+
+    pub fn candidates_at(&self, cell: Coord) -> Vec<u8> {
+        self.candidate_matrix.get_candidates(cell)
+    }
 }
 
 impl Default for Grid {
