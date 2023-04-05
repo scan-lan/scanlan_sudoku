@@ -4,9 +4,9 @@ use super::{
     puzzle::Coord,
     Group, CELL_WIDTH, ORDER, SIZE,
 };
-use std::{array, fmt};
+use std::{array, collections::HashSet, fmt};
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Cell {
     Given(u8),
     Filled(u8),
@@ -37,6 +37,7 @@ pub struct Grid {
     boxes: [Group; SIZE],
     candidate_matrix: CandidateMatrix,
     pub empty_cell_count: u8,
+    pub solved: bool,
 }
 
 impl Grid {
@@ -47,7 +48,17 @@ impl Grid {
             boxes: [[Cell::Empty; SIZE]; SIZE],
             candidate_matrix: CandidateMatrix::new(),
             empty_cell_count: SIZE.pow(2) as u8,
+            solved: false,
         }
+    }
+
+    fn check_solved(&mut self) {
+        let different = |&group| HashSet::from(group).len() == SIZE;
+
+        self.solved = self.empty_cell_count == 0
+            && self.rows.iter().all(different)
+            && self.cols.iter().all(different)
+            && self.boxes.iter().all(different);
     }
 
     pub fn from(rows: [Group; SIZE]) -> Grid {
@@ -58,13 +69,17 @@ impl Grid {
             acc
         });
 
-        Grid {
+        let mut g = Grid {
             rows,
             cols,
             boxes,
             candidate_matrix: rows.into(),
             empty_cell_count,
-        }
+            solved: false,
+        };
+
+        g.check_solved();
+        g
     }
 
     pub fn rows(&self) -> &[Group; SIZE] {
