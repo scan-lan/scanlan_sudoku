@@ -13,11 +13,13 @@ pub fn run() {
 
 pub fn grid_from_input() -> Grid {
     // get input etc etc
-    let mut display_grid = DisplayableGrid([[Cell::Empty; SIZE]; SIZE]);
-    for (i, row) in display_grid.0.iter_mut().enumerate() {
+    let mut new_grid = DisplayableGrid([[Cell::Empty; SIZE]; SIZE]);
+    for (i, row) in new_grid.0.iter_mut().enumerate() {
         for (j, cell) in row.iter_mut().enumerate() {
             *cell = Cell::Given(0);
 
+            let mut display_grid = DisplayableGrid([[Cell::Empty; SIZE]; SIZE]);
+            display_grid.0[i][j] = Cell::Given(0);
             println!("{}", display_grid);
             println!(
                 "Please enter value for cell {}, marked with a '?'",
@@ -27,7 +29,7 @@ pub fn grid_from_input() -> Grid {
         }
     }
 
-    Grid::from(display_grid.0)
+    Grid::from(new_grid.0)
 }
 
 fn prompt_for_value() -> Cell {
