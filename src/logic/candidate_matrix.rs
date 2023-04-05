@@ -109,4 +109,12 @@ impl CandidateMatrix {
 
         coords
     }
+
+    pub fn undo_changed(&mut self, val: Cell, changed: Vec<Coord>) {
+        if let Cell::Given(n) = val {
+            changed.iter().for_each(|cell| {
+                self.0[cell.row][cell.col].insert(n);
+            });
+        }
+    }
 }

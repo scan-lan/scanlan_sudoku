@@ -2,6 +2,7 @@ use super::{
     candidate_matrix::CandidateMatrix,
     grid_trait::{DisplayableGrid, GridTrait},
     puzzle::Coord,
+    solver::Decision,
     Group, CELL_WIDTH, ORDER, SIZE,
 };
 use std::{array, collections::HashSet, fmt};
@@ -144,9 +145,9 @@ impl Grid {
             self.empty_cell_count -= 1;
         }
 
+        let (box_row, box_col) = row_coords_to_box_coords(cell).into();
         self.rows[cell.row][cell.col] = Cell::Filled(val);
         self.cols[cell.col][cell.row] = Cell::Filled(val);
-        let (box_row, box_col) = row_coords_to_box_coords(cell).into();
         self.boxes[box_row][box_col] = Cell::Filled(val);
 
         // Creates a copy of candidate matrix in case the update is invalid
@@ -159,7 +160,10 @@ impl Grid {
         if let Err(_) = result {
             // Revert to the copied version
             self.candidate_matrix = cm_backup;
+        } else {
+            self.check_solved();
         }
+
         result
     }
 
@@ -173,6 +177,15 @@ impl Grid {
 
     pub fn get_min_candidates_cell(&self) -> Coord {
         self.candidate_matrix.get_min_candidates_cell()
+    }
+
+    /// Undo the decision supplied. This updates `self.rows`, `self.cols`,
+    /// `self.boxes`, and `self.candidate_matrix`.
+    pub fn undo(&mut self, dec: Decision) {
+        self.clear(dec.cell)
+            .expect("Undo can't be called on a clue");
+        self.candidate_matrix
+            .undo_changed(dec.new, dec.candidates_changed);
     }
 
     pub fn candidates_at(&self, cell: Coord) -> Vec<u8> {

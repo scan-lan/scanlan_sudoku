@@ -1,14 +1,19 @@
-use super::{puzzle::Coord, Grid};
+use super::{puzzle::Coord, Cell, Grid};
 
 /// Represents a decision taken by the algorithm
-struct Decision {
+pub struct Decision {
     pub cell: Coord,
-    pub val: u8,
+    pub new: Cell,
+    pub candidates_changed: Vec<Coord>,
 }
 
 impl Decision {
-    fn new(cell: Coord, val: u8) -> Self {
-        Decision { cell, val }
+    fn new(cell: Coord, val: Cell, candidates_changed: Vec<Coord>) -> Self {
+        Decision {
+            cell,
+            new: val,
+            candidates_changed,
+        }
     }
 }
 
