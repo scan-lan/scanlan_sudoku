@@ -20,7 +20,7 @@ pub fn grid_from_input() -> Grid {
     for i in 0..SIZE {
         for j in 0..SIZE {
             let mut display_grid = new_grid.clone();
-            display_grid.0[i][j] = Cell::Given(0);
+            display_grid.0[i][j] = Cell::Clue(0);
             println!("{}", display_grid);
             println!(
                 "Please enter value for cell {}, marked with a '?'",
@@ -34,9 +34,9 @@ pub fn grid_from_input() -> Grid {
 }
 
 fn prompt_for_value() -> Cell {
-    let mut val = Cell::Given(0);
+    let mut val = Cell::Clue(0);
 
-    while val == Cell::Given(0) {
+    while val == Cell::Clue(0) {
         let mut response = String::new();
         if let Err(e) = io::stdin().read_line(&mut response) {
             println!("Unexpected error: {e}\nPlease try again");
@@ -50,7 +50,7 @@ fn prompt_for_value() -> Cell {
 
         if let Ok(n) = response.parse::<u8>() {
             if (1..=SIZE).contains(&(n as usize)) {
-                val = Cell::Given(n);
+                val = Cell::Clue(n);
                 break;
             } else {
                 println!("Please enter a number in the range 1-{SIZE}");

@@ -9,7 +9,7 @@ use std::{array, collections::HashSet, fmt};
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Cell {
-    Given(u8),
+    Clue(u8),
     Filled(u8),
     Empty,
 }
@@ -18,7 +18,7 @@ impl fmt::Display for Cell {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let width = usize::try_from(CELL_WIDTH).expect("cell width should always be small");
         match self {
-            Self::Given(n) => {
+            Self::Clue(n) => {
                 if n == &0 {
                     write!(f, "{:>width$}", '?')
                 } else {
@@ -120,7 +120,7 @@ impl Grid {
         let (row, col) = cell.into();
         match self.rows[row][col] {
             Cell::Empty => Ok(()),
-            Cell::Given(_) => Err(GridError::new(ErrorKind::ClearedClue, cell, 0)),
+            Cell::Clue(_) => Err(GridError::new(ErrorKind::ClearedClue, cell, 0)),
             Cell::Filled(_) => {
                 let (box_row, box_col) = row_coords_to_box_coords(cell).into();
                 self.rows[row][col] = Cell::Empty;
@@ -134,12 +134,12 @@ impl Grid {
     }
 
     /// Update the value at `cell` to `val`. Returns an error if `cell` is a
-    /// given, or the update would result in another cell having zero valid
+    /// clue, or the update would result in another cell having zero valid
     /// candidates. Changes to candidates are rolled back if an error occurs.
     /// Returns the coordinates of all cells whose candidates were changed by
     /// the update.
     pub fn update(&mut self, cell: Coord, val: u8) -> Result<Vec<Coord>, GridError> {
-        if let Cell::Given(_) = self.get_cell(cell) {
+        if let Cell::Clue(_) = self.get_cell(cell) {
             return Err(GridError::new(ErrorKind::UpdatedClue, cell, val));
         } else if let Cell::Empty = self.get_cell(cell) {
             self.empty_cell_count -= 1;
@@ -259,7 +259,7 @@ pub fn get_box_coords_containing(cell: Coord) -> [Coord; SIZE] {
 
 pub fn get_base_solution() -> [Group; SIZE] {
     array::from_fn(|i| {
-        array::from_fn(|j| Cell::Given((1 + (j + (i / ORDER) + (i % ORDER) * ORDER) % SIZE) as u8))
+        array::from_fn(|j| Cell::Clue((1 + (j + (i / ORDER) + (i % ORDER) * ORDER) % SIZE) as u8))
     })
 }
 

@@ -11,14 +11,14 @@ impl From<[[Cell; SIZE]; SIZE]> for CandidateMatrix {
 
         let mut cm = CandidateMatrix(rows.map(|row| {
             row.map(|cell| match cell {
-                Cell::Given(_) => HashSet::from([0]),
+                Cell::Clue(_) => HashSet::from([0]),
                 _ => candidates.clone(),
             })
         }));
 
         rows.iter().enumerate().for_each(|(row_i, row)| {
             row.iter().enumerate().for_each(|(col_i, cell)| {
-                if let Cell::Given(n) = cell {
+                if let Cell::Clue(n) = cell {
                     cm.update_around((row_i, col_i).into(), *n)
                         .expect("invalid grid entered");
                 }
@@ -115,7 +115,7 @@ impl CandidateMatrix {
     }
 
     pub fn undo_changed(&mut self, val: Cell, changed: Vec<Coord>) {
-        if let Cell::Given(n) = val {
+        if let Cell::Clue(n) = val {
             changed.iter().for_each(|cell| {
                 self.0[cell.row][cell.col].insert(n);
             });
