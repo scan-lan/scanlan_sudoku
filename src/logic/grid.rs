@@ -20,7 +20,7 @@ impl fmt::Display for Cell {
         match self {
             Self::Given(n) => {
                 if n == &0 {
-                    write!(f, "{:width$}", '?')
+                    write!(f, "{:>width$}", '?')
                 } else {
                     write!(f, "{:width$}", n)
                 }

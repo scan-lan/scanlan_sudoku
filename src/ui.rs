@@ -17,18 +17,16 @@ pub fn run() {
 pub fn grid_from_input() -> Grid {
     // get input etc etc
     let mut new_grid = DisplayableGrid([[Cell::Empty; SIZE]; SIZE]);
-    for (i, row) in new_grid.0.iter_mut().enumerate() {
-        for (j, cell) in row.iter_mut().enumerate() {
-            *cell = Cell::Given(0);
-
-            let mut display_grid = DisplayableGrid([[Cell::Empty; SIZE]; SIZE]);
+    for i in 0..SIZE {
+        for j in 0..SIZE {
+            let mut display_grid = new_grid.clone();
             display_grid.0[i][j] = Cell::Given(0);
             println!("{}", display_grid);
             println!(
                 "Please enter value for cell {}, marked with a '?'",
                 Coord::from((i + 1, j + 1))
             );
-            *cell = prompt_for_value();
+            new_grid.0[i][j] = prompt_for_value();
         }
     }
 
