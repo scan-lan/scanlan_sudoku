@@ -36,8 +36,8 @@ impl CandidateMatrix {
         CandidateMatrix(array::from_fn(|_| array::from_fn(|_| c_matrix.clone())))
     }
 
-    pub fn get_candidates(&self, cell: Coord) -> &HashSet<u8> {
-        &self.0[cell.row][cell.col]
+    pub fn get_candidates(&self, cell: Coord) -> Vec<u8> {
+        Vec::from_iter(self.0[cell.row][cell.col].clone())
     }
 
     /// Update the candidates for each group containing `cell`
