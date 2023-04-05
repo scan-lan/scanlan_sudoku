@@ -22,6 +22,7 @@ impl<T: Clone> GridTrait<T> for [[T; SIZE]; SIZE] {
     }
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DisplayableGrid<T>(pub [[T; SIZE]; SIZE]);
 
 impl<T: fmt::Display> fmt::Display for DisplayableGrid<T> {

@@ -5,6 +5,7 @@ const CELL_WIDTH: u32 = SIZE.ilog10() + 2;
 pub use grid::{get_base_solution, Cell, Grid};
 pub use grid_trait::DisplayableGrid;
 pub use puzzle::{Coord, Puzzle};
+pub use solver::solve_backtracking_heuristics;
 pub use types::Move;
 
 type Group = [grid::Cell; SIZE];

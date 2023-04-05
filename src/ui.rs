@@ -1,14 +1,17 @@
 use std::io;
 
-use crate::logic::{Cell, Coord, DisplayableGrid, SIZE};
+use crate::logic::{solve_backtracking_heuristics, Cell, Coord, DisplayableGrid, SIZE};
 
 use crate::logic::Grid;
 
-use super::logic::Puzzle;
-
 pub fn run() {
-    let p = Puzzle::new();
-    println!("{}", p.solution().unwrap());
+    let g = grid_from_input();
+    println!("{}", g);
+
+    let g_solved = solve_backtracking_heuristics(g);
+    if let Some(g) = g_solved {
+        println!("{}", g);
+    }
 }
 
 pub fn grid_from_input() -> Grid {
