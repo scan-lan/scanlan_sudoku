@@ -17,22 +17,30 @@ impl Decision {
     }
 }
 
-pub fn solve_backtracking_heuristics(mut g: Grid) -> Grid {
+pub fn solve_backtracking_heuristics(mut g: Grid) -> Option<Grid> {
     let mut history: Vec<Decision> = Vec::new();
 
-    while g.empty_cell_count > 0 {
+    'outer: while g.empty_cell_count > 0 && !g.solved {
+        // Get cell with least valid candidates
         let target = g.get_min_candidates_cell();
-        let choice = g.collapse(target);
 
-        match g.update(target, choice) {
-            Ok(_) => {
-                history.push(Decision::new(target, choice));
-            }
-            Err(_) => {
-                g.remove_candidate(target, choice);
-                continue;
+        // Iterate over all candidates
+        for val in g.candidates_at(target).iter() {
+            if let Ok(candidates_changed) = g.update(target, *val) {
+                // If candidate valid, push decision onto history stack; continue while loop
+                history.push(Decision::new(
+                    target,
+                    Cell::Filled(*val),
+                    candidates_changed,
+                ));
+                continue 'outer;
             }
         }
+
+        // No values were accepted in the for loop, so undo last decision
+        if let Some(last_decision) = history.pop() {
+            g.undo(last_decision);
+        }
     }
-    g
+    Some(g)
 }
