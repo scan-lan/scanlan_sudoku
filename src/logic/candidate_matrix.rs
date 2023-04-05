@@ -40,8 +40,9 @@ impl CandidateMatrix {
         Vec::from_iter(self.0[cell.row][cell.col].clone())
     }
 
-    /// Update the candidate sets for each group containing `cell`. Returns the
-    /// coordinates of all candidate sets changed by the update.
+    /// Update the candidate sets for each group containing `cell`. Returns a
+    /// deduplicated vector of coordinates of all candidate sets changed by the
+    /// update.
     pub fn update_around(&mut self, cell: Coord, val: u8) -> Result<Vec<Coord>, ()> {
         let mut changed = vec![];
 
@@ -71,6 +72,9 @@ impl CandidateMatrix {
                 return Err(());
             }
         }
+
+        changed.sort();
+        changed.dedup();
 
         Ok(changed)
     }

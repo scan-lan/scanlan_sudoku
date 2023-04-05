@@ -2,7 +2,7 @@ use std::fmt;
 
 use super::{get_base_solution, Grid, Group};
 
-#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, PartialOrd, Ord)]
 pub struct Coord {
     pub row: usize,
     pub col: usize,
