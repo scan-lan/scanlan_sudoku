@@ -130,7 +130,7 @@ impl Grid {
         let cm_backup = self.candidate_matrix.clone();
         let result = self
             .candidate_matrix
-            .update_candidates(cell, val)
+            .update_around(cell, val)
             .map_err(|_| GridError::new(ErrorKind::ZeroCandidates, cell, val));
 
         if let Err(_) = result {
