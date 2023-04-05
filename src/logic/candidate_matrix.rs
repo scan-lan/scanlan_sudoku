@@ -40,30 +40,39 @@ impl CandidateMatrix {
         Vec::from_iter(self.0[cell.row][cell.col].clone())
     }
 
-    /// Update the candidates for each group containing `cell`
-    pub fn update_around(&mut self, cell: Coord, val: u8) -> Result<(), ()> {
-        for candidates in self.0[cell.row].iter_mut() {
-            candidates.remove(&val);
+    /// Update the candidate sets for each group containing `cell`. Returns the
+    /// coordinates of all candidate sets changed by the update.
+    pub fn update_around(&mut self, cell: Coord, val: u8) -> Result<Vec<Coord>, ()> {
+        let mut changed = vec![];
+
+        for (col_i, candidates) in self.0[cell.row].iter_mut().enumerate() {
+            if candidates.remove(&val) {
+                changed.push((cell.row, col_i).into());
+            }
             if candidates.is_empty() {
                 return Err(());
             }
         }
 
-        for row in self.0.iter_mut() {
-            row[cell.col].remove(&val);
+        for (row_i, row) in self.0.iter_mut().enumerate() {
+            if row[cell.col].remove(&val) {
+                changed.push((row_i, cell.col).into())
+            }
             if row[cell.col].is_empty() {
                 return Err(());
             }
         }
 
         for coord in get_box_coords_containing(cell).into_iter() {
-            self.0[coord.row][coord.col].remove(&val);
+            if self.0[coord.row][coord.col].remove(&val) {
+                changed.push(coord);
+            }
             if self.0[coord.row][coord.col].is_empty() {
                 return Err(());
             }
         }
 
-        Ok(())
+        Ok(changed)
     }
 
     pub fn collapse(&mut self, cell: Coord) -> u8 {

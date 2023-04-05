@@ -132,7 +132,9 @@ impl Grid {
     /// Update the value at `cell` to `val`. Returns an error if `cell` is a
     /// given, or the update would result in another cell having zero valid
     /// candidates. Changes to candidates are rolled back if an error occurs.
-    pub fn update(&mut self, cell: Coord, val: u8) -> Result<(), GridError> {
+    /// Returns the coordinates of all cells whose candidates were changed by
+    /// the update.
+    pub fn update(&mut self, cell: Coord, val: u8) -> Result<Vec<Coord>, GridError> {
         if let Cell::Given(_) = self.get_cell(cell) {
             return Err(GridError::new(ErrorKind::UpdatedClue, cell, val));
         } else if let Cell::Empty = self.get_cell(cell) {
