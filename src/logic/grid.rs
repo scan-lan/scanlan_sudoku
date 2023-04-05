@@ -125,6 +125,8 @@ impl Grid {
                 self.rows[row][col] = Cell::Empty;
                 self.cols[col][row] = Cell::Empty;
                 self.boxes[box_row][box_col] = Cell::Empty;
+                self.empty_cell_count += 1;
+
                 Ok(())
             }
         }
