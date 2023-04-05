@@ -114,6 +114,7 @@ impl Grid {
         &self.rows[cell.row][cell.col]
     }
 
+    /// Set `cell` to empty. Returns an error if called on a clue.
     pub fn clear(&mut self, cell: Coord) -> Result<(), GridError> {
         let (row, col) = cell.into();
         match self.rows[row][col] {
