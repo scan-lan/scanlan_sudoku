@@ -20,7 +20,7 @@ impl Decision {
 pub fn solve_backtracking_heuristics(mut g: Grid) -> Option<Grid> {
     let mut history: Vec<Decision> = Vec::new();
 
-    'outer: while g.empty_cell_count > 0 && !g.solved {
+    'outer: while !g.solved {
         // Get cell with least valid candidates
         let target = g.get_min_candidates_cell();
 
