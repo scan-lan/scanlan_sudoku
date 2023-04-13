@@ -30,7 +30,9 @@ pub fn grid_from_input() -> Grid {
         }
     }
 
-    Grid::from(new_grid.0)
+    let new_g = Grid::from(new_grid.0);
+    dbg!(&new_g);
+    new_g
 }
 
 fn prompt_for_value() -> Cell {
@@ -82,3 +84,105 @@ fn prompt_for_value() -> Cell {
 //         }
 //     }
 // }
+
+// const PRACTICE_GRID: [[Cell; SIZE]; SIZE] = [
+//     [
+//         Cell::Clue(9),
+//         Cell::Empty,
+//         Cell::Clue(6),
+//         Cell::Empty,
+//         Cell::Empty,
+//         Cell::Clue(1),
+//         Cell::Empty,
+//         Cell::Clue(4),
+//         Cell::Empty,
+//     ],
+//     [
+//         Cell::Clue(7),
+//         Cell::Empty,
+//         Cell::Clue(1),
+//         Cell::Clue(2),
+//         Cell::Clue(9),
+//         Cell::Empty,
+//         Cell::Empty,
+//         Cell::Clue(6),
+//         Cell::Empty,
+//     ],
+//     [
+//         Cell::Clue(4),
+//         Cell::Empty,
+//         Cell::Clue(2),
+//         Cell::Clue(8),
+//         Cell::Empty,
+//         Cell::Clue(6),
+//         Cell::Clue(3),
+//         Cell::Empty,
+//         Cell::Empty,
+//     ],
+//     [
+//         Cell::Empty,
+//         Cell::Empty,
+//         Cell::Empty,
+//         Cell::Empty,
+//         Cell::Clue(2),
+//         Cell::Empty,
+//         Cell::Clue(9),
+//         Cell::Clue(8),
+//         Cell::Empty,
+//     ],
+//     [
+//         Cell::Clue(6),
+//         Cell::Empty,
+//         Cell::Empty,
+//         Cell::Empty,
+//         Cell::Empty,
+//         Cell::Empty,
+//         Cell::Empty,
+//         Cell::Empty,
+//         Cell::Clue(2),
+//     ],
+//     [
+//         Cell::Empty,
+//         Cell::Clue(9),
+//         Cell::Clue(4),
+//         Cell::Empty,
+//         Cell::Clue(8),
+//         Cell::Empty,
+//         Cell::Empty,
+//         Cell::Empty,
+//         Cell::Empty,
+//     ],
+//     [
+//         Cell::Empty,
+//         Cell::Empty,
+//         Cell::Clue(3),
+//         Cell::Clue(7),
+//         Cell::Empty,
+//         Cell::Clue(8),
+//         Cell::Clue(4),
+//         Cell::Empty,
+//         Cell::Clue(9),
+//     ],
+//     [
+//         Cell::Empty,
+//         Cell::Clue(4),
+//         Cell::Empty,
+//         Cell::Empty,
+//         Cell::Clue(1),
+//         Cell::Clue(3),
+//         Cell::Clue(7),
+//         Cell::Empty,
+//         Cell::Clue(6),
+//     ],
+//     [
+//         Cell::Empty,
+//         Cell::Clue(6),
+//         Cell::Empty,
+//         Cell::Clue(9),
+//         Cell::Empty,
+//         Cell::Empty,
+//         Cell::Clue(1),
+//         Cell::Empty,
+//         Cell::Clue(8),
+//     ],
+// ];

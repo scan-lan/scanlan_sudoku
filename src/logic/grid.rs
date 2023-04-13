@@ -215,7 +215,7 @@ impl Default for Grid {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct GridError {
     details: String,
     pub kind: ErrorKind,
@@ -251,7 +251,7 @@ impl std::error::Error for GridError {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Copy, Debug)]
 pub enum ErrorKind {
     ClearedClue,
     UpdatedClue,

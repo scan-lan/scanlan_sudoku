@@ -50,6 +50,7 @@ pub fn solve_backtracking_heuristics(mut g: Grid) -> Option<Grid> {
         if let Some(last_decision) = history.pop() {
             g.undo(last_decision);
         }
+        println!("{g}");
     }
     Some(g)
 }
