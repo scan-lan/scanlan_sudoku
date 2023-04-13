@@ -187,6 +187,21 @@ impl Grid {
             .expect("Undo can't be called on a clue");
         self.candidate_matrix
             .undo_changed(dec.val, dec.candidates_changed);
+
+        // Restores the candidates at the cell for the decision taken, with the
+        // exception of the value in the decision taken.
+        dec.prev_cell_candidates
+            .iter()
+            .filter(|c| {
+                if let Cell::Filled(n) = dec.val {
+                    *c != &n
+                } else {
+                    true
+                }
+            })
+            .for_each(|c| {
+                self.candidate_matrix.add_candidate(dec.cell, *c);
+            });
     }
 
     pub fn candidates_at(&self, cell: Coord) -> Vec<u8> {
