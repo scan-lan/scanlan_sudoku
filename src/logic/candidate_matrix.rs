@@ -104,7 +104,7 @@ impl CandidateMatrix {
 
         for (i, row) in self.0.iter().enumerate() {
             for (j, candidates) in row.iter().enumerate() {
-                if !candidates.contains(&0) && (2..min).contains(&candidates.len()) {
+                if !candidates.contains(&0) && candidates.len() < min {
                     min = candidates.len();
                     coords = Coord { row: i, col: j };
                 }
