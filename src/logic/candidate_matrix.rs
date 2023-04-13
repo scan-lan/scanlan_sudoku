@@ -121,4 +121,10 @@ impl CandidateMatrix {
             });
         }
     }
+
+    /// This marks a 'Filled' cell as fixed, so it won't be included in
+    /// `get_min_candidates` results.
+    pub fn set_fixed(&mut self, cell: Coord) {
+        self.0[cell.row][cell.col] = HashSet::from([0]);
+    }
 }

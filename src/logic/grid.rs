@@ -152,6 +152,7 @@ impl Grid {
 
         // Creates a copy of candidate matrix in case the update is invalid
         let cm_backup = self.candidate_matrix.clone();
+        self.candidate_matrix.set_fixed(cell);
         let result = self
             .candidate_matrix
             .update_around(cell, val)
