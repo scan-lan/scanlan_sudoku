@@ -186,7 +186,7 @@ impl Grid {
         self.clear(dec.cell)
             .expect("Undo can't be called on a clue");
         self.candidate_matrix
-            .undo_changed(dec.new, dec.candidates_changed);
+            .undo_changed(dec.val, dec.candidates_changed);
     }
 
     pub fn candidates_at(&self, cell: Coord) -> Vec<u8> {

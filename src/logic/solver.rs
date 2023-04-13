@@ -3,7 +3,7 @@ use super::{puzzle::Coord, Cell, Grid};
 /// Represents a decision taken by the algorithm
 pub struct Decision {
     pub cell: Coord,
-    pub new: Cell,
+    pub val: Cell,
     pub candidates_changed: Vec<Coord>,
 }
 
@@ -11,7 +11,7 @@ impl Decision {
     fn new(cell: Coord, val: Cell, candidates_changed: Vec<Coord>) -> Self {
         Decision {
             cell,
-            new: val,
+            val,
             candidates_changed,
         }
     }
