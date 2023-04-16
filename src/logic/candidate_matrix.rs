@@ -1,6 +1,9 @@
-use std::{array, collections::HashSet};
+use std::fmt::Write;
+use std::{array, collections::HashSet, fmt};
 
-use super::{grid::get_box_coords_containing, puzzle::Coord, Cell, SIZE};
+use super::{
+    grid::get_box_coords_containing, puzzle::Coord, Cell, CELL_WIDTH, NUM_WIDTH, ORDER, SIZE,
+};
 
 #[derive(Debug, Clone)]
 pub struct CandidateMatrix([[HashSet<u8>; SIZE]; SIZE]);
@@ -126,5 +129,53 @@ impl CandidateMatrix {
     /// `get_min_candidates` results.
     pub fn set_fixed(&mut self, cell: Coord) {
         self.0[cell.row][cell.col] = HashSet::from([0]);
+    }
+}
+
+fn fmt_row(row: &[HashSet<u8>; SIZE]) -> Result<String, fmt::Error> {
+    let width = NUM_WIDTH as usize;
+    let mut s = String::new();
+
+    for outer_idx in 0..ORDER {
+        for candidate_idx in 0..SIZE {
+            for inner_idx in 1..=ORDER {
+                if inner_idx == 1 {
+                    write!(s, " ")?;
+                }
+                let candidate = inner_idx + outer_idx * ORDER;
+                if row[candidate_idx].contains(&(candidate as u8)) {
+                    write!(s, "{:>width$}", candidate)?;
+                } else {
+                    write!(s, "{:>width$}", " ")?;
+                }
+            }
+            if candidate_idx != SIZE - 1 && candidate_idx % ORDER == ORDER - 1 {
+                write!(s, "{:>2}", "|")?;
+            }
+        }
+        writeln!(s)?;
+    }
+    Ok(s)
+}
+
+impl fmt::Display for CandidateMatrix {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let num_width = NUM_WIDTH as usize;
+        let line_width = SIZE * (num_width * ORDER + 1) + (2 * (ORDER - 1)) + 1;
+        let box_width = line_width / ORDER + 1;
+
+        for (i, row) in self.0.iter().enumerate() {
+            let row_str = fmt_row(row).expect("Shouldn't fail");
+            write!(f, "{row_str}")?;
+            for _ in 0..(ORDER - 1) {
+                write!(f, "{:>box_width$}", "|")?;
+            }
+            writeln!(f)?;
+
+            if i != SIZE - 1 && i % ORDER == ORDER - 1 {
+                writeln!(f, "{:->line_width$}", "-")?;
+            }
+        }
+        Ok(())
     }
 }
