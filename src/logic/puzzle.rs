@@ -59,6 +59,12 @@ impl Puzzle {
     }
 }
 
+impl Default for Puzzle {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 #[cfg(test)]
 mod puzzle_tests {
 
