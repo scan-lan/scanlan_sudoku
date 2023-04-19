@@ -1,4 +1,5 @@
 use std::io;
+use std::time::Instant;
 
 use crate::logic::{solve_backtracking_heuristics, Cell, Coord, DisplayableGrid, SIZE};
 
@@ -12,7 +13,10 @@ pub fn run() {
     println!("{}", g);
     println!("{}", g.candidate_matrix());
 
+    let now = Instant::now();
     let g_solved = solve_backtracking_heuristics(g);
+    println!("Solved in {}ms", now.elapsed().as_millis());
+
     if let Some(g) = g_solved {
         println!("{}", g);
     }
