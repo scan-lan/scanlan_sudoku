@@ -3,10 +3,11 @@ use std::io;
 use crate::logic::{solve_backtracking_heuristics, Cell, Coord, DisplayableGrid, SIZE};
 
 use crate::logic::Grid;
+use crate::puzzles::HARD_GRID;
 
 pub fn run() {
     // let g = grid_from_input();
-    let g = Grid::from(PRACTICE_GRID);
+    let g = Grid::from(HARD_GRID);
     // let g = Grid::new();
     println!("{}", g);
     println!("{}", g.candidate_matrix());
@@ -87,105 +88,3 @@ fn prompt_for_value() -> Cell {
 //         }
 //     }
 // }
-
-const PRACTICE_GRID: [[Cell; SIZE]; SIZE] = [
-    [
-        Cell::Clue(9),
-        Cell::Empty,
-        Cell::Clue(6),
-        Cell::Empty,
-        Cell::Empty,
-        Cell::Clue(1),
-        Cell::Empty,
-        Cell::Clue(4),
-        Cell::Empty,
-    ],
-    [
-        Cell::Clue(7),
-        Cell::Empty,
-        Cell::Clue(1),
-        Cell::Clue(2),
-        Cell::Clue(9),
-        Cell::Empty,
-        Cell::Empty,
-        Cell::Clue(6),
-        Cell::Empty,
-    ],
-    [
-        Cell::Clue(4),
-        Cell::Empty,
-        Cell::Clue(2),
-        Cell::Clue(8),
-        Cell::Empty,
-        Cell::Clue(6),
-        Cell::Clue(3),
-        Cell::Empty,
-        Cell::Empty,
-    ],
-    [
-        Cell::Empty,
-        Cell::Empty,
-        Cell::Empty,
-        Cell::Empty,
-        Cell::Clue(2),
-        Cell::Empty,
-        Cell::Clue(9),
-        Cell::Clue(8),
-        Cell::Empty,
-    ],
-    [
-        Cell::Clue(6),
-        Cell::Empty,
-        Cell::Empty,
-        Cell::Empty,
-        Cell::Empty,
-        Cell::Empty,
-        Cell::Empty,
-        Cell::Empty,
-        Cell::Clue(2),
-    ],
-    [
-        Cell::Empty,
-        Cell::Clue(9),
-        Cell::Clue(4),
-        Cell::Empty,
-        Cell::Clue(8),
-        Cell::Empty,
-        Cell::Empty,
-        Cell::Empty,
-        Cell::Empty,
-    ],
-    [
-        Cell::Empty,
-        Cell::Empty,
-        Cell::Clue(3),
-        Cell::Clue(7),
-        Cell::Empty,
-        Cell::Clue(8),
-        Cell::Clue(4),
-        Cell::Empty,
-        Cell::Clue(9),
-    ],
-    [
-        Cell::Empty,
-        Cell::Clue(4),
-        Cell::Empty,
-        Cell::Empty,
-        Cell::Clue(1),
-        Cell::Clue(3),
-        Cell::Clue(7),
-        Cell::Empty,
-        Cell::Clue(6),
-    ],
-    [
-        Cell::Empty,
-        Cell::Clue(6),
-        Cell::Empty,
-        Cell::Clue(9),
-        Cell::Empty,
-        Cell::Empty,
-        Cell::Clue(1),
-        Cell::Empty,
-        Cell::Clue(8),
-    ],
-];
