@@ -167,7 +167,9 @@ fn fmt_row(row: &[HashSet<u8>; SIZE]) -> Result<String, fmt::Error> {
                     write!(s, " ")?;
                 }
                 let candidate = inner_idx + outer_idx * ORDER;
-                if row[candidate_idx].contains(&(candidate as u8)) {
+                if row[candidate_idx].contains(&0) {
+                    write!(s, "{:>width$}", "X")?;
+                } else if row[candidate_idx].contains(&(candidate as u8)) {
                     write!(s, "{:>width$}", candidate)?;
                 } else {
                     write!(s, "{:>width$}", " ")?;

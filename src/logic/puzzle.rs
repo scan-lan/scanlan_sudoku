@@ -2,10 +2,16 @@ use std::fmt;
 
 use super::{get_base_solution, Grid, Group};
 
-#[derive(Debug, PartialEq, Eq, Clone, Copy, PartialOrd, Ord)]
+#[derive(PartialEq, Eq, Clone, Copy, PartialOrd, Ord)]
 pub struct Coord {
     pub row: usize,
     pub col: usize,
+}
+
+impl fmt::Debug for Coord {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "({}, {})", self.row, self.col)
+    }
 }
 
 impl fmt::Display for Coord {
