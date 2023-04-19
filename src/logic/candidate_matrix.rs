@@ -4,7 +4,7 @@ use std::{array, collections::HashSet, fmt};
 use rand::seq::SliceRandom;
 
 use super::{
-    grid::get_box_coords_containing, puzzle::Coord, Cell, CELL_WIDTH, NUM_WIDTH, ORDER, SIZE,
+    grid::get_box_coords_containing, puzzle::Coord, Cell, NUM_WIDTH, ORDER, SIZE,
 };
 
 #[derive(Debug, Clone)]
@@ -139,15 +139,15 @@ fn fmt_row(row: &[HashSet<u8>; SIZE]) -> Result<String, fmt::Error> {
     let mut s = String::new();
 
     for outer_idx in 0..ORDER {
-        for candidate_idx in 0..SIZE {
+        for (candidate_idx, candidates) in row.iter().enumerate().take(SIZE) {
             for inner_idx in 1..=ORDER {
                 if inner_idx == 1 {
                     write!(s, " ")?;
                 }
                 let candidate = inner_idx + outer_idx * ORDER;
-                if row[candidate_idx].contains(&0) {
+                if candidates.contains(&0) {
                     write!(s, "{:>width$}", "X")?;
-                } else if row[candidate_idx].contains(&(candidate as u8)) {
+                } else if candidates.contains(&(candidate as u8)) {
                     write!(s, "{:>width$}", candidate)?;
                 } else {
                     write!(s, "{:>width$}", " ")?;

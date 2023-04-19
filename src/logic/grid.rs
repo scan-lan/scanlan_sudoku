@@ -157,7 +157,7 @@ impl Grid {
             .update_around(cell, val)
             .map_err(|_| GridError::new(ErrorKind::ZeroCandidates, cell, val));
 
-        if let Err(_) = result {
+        if result.is_err() {
             // Revert to the copied version
             self.candidate_matrix = cm_backup;
         } else {

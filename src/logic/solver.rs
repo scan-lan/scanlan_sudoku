@@ -28,10 +28,10 @@ pub fn solve_backtracking_heuristics(mut g: Grid) -> Option<Grid> {
 
         match candidates.len().cmp(&1) {
             Ordering::Greater => {
-                let mut backtrack = g.clone();
+                let backtrack = g.clone();
 
                 for val in candidates.clone().into_iter() {
-                    if let Ok(candidates_changed) = g.update(target, val) {
+                    if g.update(target, val).is_ok() {
                         // If candidate valid, push decision onto history stack; continue while loop
                         history.push((backtrack, val, target));
                         continue 'outer;
@@ -39,7 +39,7 @@ pub fn solve_backtracking_heuristics(mut g: Grid) -> Option<Grid> {
                 }
             }
             Ordering::Equal => {
-                if let Err(e) = g.update(target, candidates[0]) {
+                if g.update(target, candidates[0]).is_err() {
                     // println!("{e}");
                     let dec = history.pop().expect("Shouldn't run out of history");
                     g = dec.0;
@@ -50,5 +50,6 @@ pub fn solve_backtracking_heuristics(mut g: Grid) -> Option<Grid> {
             Ordering::Less => panic!("This should never happen"),
         }
     }
+
     Some(g)
 }
