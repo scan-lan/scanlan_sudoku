@@ -29,6 +29,7 @@ pub fn solve_backtracking_heuristics(mut g: Grid) -> Option<Grid> {
         match candidates.len().cmp(&1) {
             Ordering::Greater => {
                 let mut backtrack = g.clone();
+
                 for val in candidates.clone().into_iter() {
                     if let Ok(candidates_changed) = g.update(target, val) {
                         // If candidate valid, push decision onto history stack; continue while loop
@@ -37,34 +38,17 @@ pub fn solve_backtracking_heuristics(mut g: Grid) -> Option<Grid> {
                     }
                 }
             }
-            Ordering::Equal => match g.update(target, candidates[0]) {
-                Ok(candidates_changed) => {
-                    // history.push(Decision::new(
-                    //     target,
-                    //     Cell::Filled(candidates[0]),
-                    //     candidates_changed,
-                    //     candidates,
-                    //     true,
-                    // ));
-                }
-                Err(e) => {
+            Ordering::Equal => {
+                if let Err(e) = g.update(target, candidates[0]) {
                     // println!("{e}");
-                    // while history.last().unwrap().forced {
                     let dec = history.pop().expect("Shouldn't run out of history");
                     g = dec.0;
 
                     g.remove_candidate(dec.2, dec.1);
-
-                    // }
                 }
             },
-            Ordering::Less => panic!("God help us"),
+            Ordering::Less => panic!("This should never happen"),
         }
     }
-
-    // No values were accepted in the for loop, so undo last decision
-    // if let Some(last_decision) = history.pop() {
-    //     g.undo(last_decision);
-    // }
     Some(g)
 }

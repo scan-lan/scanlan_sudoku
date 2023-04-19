@@ -12,7 +12,6 @@ pub use types::Move;
 type Group = [grid::Cell; SIZE];
 
 mod candidate_matrix;
-mod decision;
 mod grid;
 mod grid_trait;
 mod puzzle;

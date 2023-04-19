@@ -1,6 +1,5 @@
 use super::{
     candidate_matrix::CandidateMatrix,
-    decision::Decision,
     grid_trait::{DisplayableGrid, GridTrait},
     puzzle::Coord,
     Group, CELL_WIDTH, ORDER, SIZE,
@@ -178,14 +177,6 @@ impl Grid {
 
     pub fn get_min_candidates_cell(&self) -> Coord {
         self.candidate_matrix.get_min_candidates_cell()
-    }
-
-    /// Undo the decision supplied. This updates `self.rows`, `self.cols`,
-    /// `self.boxes`, and `self.candidate_matrix`.
-    pub fn undo(&mut self, dec: &Decision) {
-        self.clear(dec.cell)
-            .expect("Undo can't be called on a clue");
-        self.candidate_matrix.undo_changed(dec);
     }
 
     pub fn candidates_at(&self, cell: Coord) -> Vec<u8> {
