@@ -51,10 +51,10 @@ pub fn solve_backtracking_heuristics(mut g: Grid) -> Option<Grid> {
 
         // For debugging
         println!("Grid:\n{g}");
+        println!("Candidate Matrix:\n{}", g.candidate_matrix());
         println!("Solving {target}");
         println!("Candidates: {:?}", g.candidates_at(target));
         println!("History: {:?}", history);
-        // println!("Candidate Matrix:\n{}", g.candidate_matrix());
 
         // Iterate over all candidates
         for val in g.candidates_at(target).into_iter() {
