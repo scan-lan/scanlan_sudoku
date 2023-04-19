@@ -8,6 +8,7 @@ pub struct Decision {
     pub val: Cell,
     pub candidates_changed: Vec<Coord>,
     pub prev_cell_candidates: Vec<u8>,
+    pub forced: bool,
 }
 
 impl Decision {
@@ -16,12 +17,14 @@ impl Decision {
         val: Cell,
         candidates_changed: Vec<Coord>,
         prev_cell_candidates: Vec<u8>,
+        forced: bool,
     ) -> Self {
         Decision {
             cell,
             val,
             candidates_changed,
             prev_cell_candidates,
+            forced,
         }
     }
 }
