@@ -24,6 +24,13 @@ impl Decision {
     }
 }
 
+impl std::fmt::Debug for Decision {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "<({}, {}), {}>", self.cell.row, self.cell.col, self.val)?;
+        Ok(())
+    }
+}
+
 pub fn solve_backtracking_heuristics(mut g: Grid) -> Option<Grid> {
     let mut history: Vec<Decision> = Vec::new();
 
