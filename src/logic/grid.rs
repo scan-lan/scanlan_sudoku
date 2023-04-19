@@ -1,8 +1,8 @@
 use super::{
     candidate_matrix::CandidateMatrix,
+    decision::Decision,
     grid_trait::{DisplayableGrid, GridTrait},
     puzzle::Coord,
-    solver::Decision,
     Group, CELL_WIDTH, ORDER, SIZE,
 };
 use std::{array, collections::HashSet, fmt};
