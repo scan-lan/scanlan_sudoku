@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use super::{puzzle::Coord, Cell, Grid};
 
 /// Represents a decision taken by the algorithm
@@ -33,11 +35,23 @@ impl std::fmt::Debug for Decision {
 
 pub fn solve_backtracking_heuristics(mut g: Grid) -> Option<Grid> {
     let mut history: Vec<Decision> = Vec::new();
+    let mut i = 0;
 
     'outer: while !g.solved {
+        std::thread::sleep(Duration::from_millis(500));
+        i += 1;
+        println!("{:=^79}", format!("Iteration {i}"),);
+
         // Get cell with least valid candidates
         let target = g.get_min_candidates_cell();
         let prev_cell_candidates = g.candidates_at(target);
+
+        // For debugging
+        println!("Grid:\n{g}");
+        println!("Solving {target}");
+        println!("Candidates: {:?}", g.candidates_at(target));
+        println!("History: {:?}", history);
+        // println!("Candidate Matrix:\n{}", g.candidate_matrix());
 
         // Iterate over all candidates
         for val in g.candidates_at(target).iter() {
@@ -57,7 +71,6 @@ pub fn solve_backtracking_heuristics(mut g: Grid) -> Option<Grid> {
         if let Some(last_decision) = history.pop() {
             g.undo(last_decision);
         }
-        println!("{g}");
     }
     Some(g)
 }
