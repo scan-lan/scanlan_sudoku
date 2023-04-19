@@ -3,6 +3,7 @@ use std::{array, collections::HashSet, fmt};
 
 use rand::seq::SliceRandom;
 
+use super::solver::Decision;
 use super::{
     grid::get_box_coords_containing, puzzle::Coord, Cell, CELL_WIDTH, NUM_WIDTH, ORDER, SIZE,
 };
@@ -127,9 +128,22 @@ impl CandidateMatrix {
             .expect("There has to be a minimum")
     }
 
-    pub fn undo_changed(&mut self, val: Cell, changed: Vec<Coord>) {
-        if let Cell::Clue(n) = val {
-            changed.iter().for_each(|cell| {
+    pub fn undo_changed(&mut self, dec: &Decision) {
+        // Reset the cell changed
+        self.0[dec.cell.row][dec.cell.col].remove(&0);
+
+        // Restores the candidates at the cell for the decision taken, with the
+        // exception of the value in the decision taken.
+        dec.prev_cell_candidates
+            .iter()
+            // .filter(|c| dec.forced || Cell::Filled(**c) != dec.val)
+            .for_each(|c| {
+                self.add_candidate(dec.cell, *c);
+            });
+
+        // Reset other cells affected by change
+        if let Cell::Clue(n) = dec.val {
+            dec.candidates_changed.iter().for_each(|cell| {
                 self.0[cell.row][cell.col].insert(n);
             });
         }
