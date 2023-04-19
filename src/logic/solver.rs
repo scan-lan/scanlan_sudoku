@@ -54,12 +54,12 @@ pub fn solve_backtracking_heuristics(mut g: Grid) -> Option<Grid> {
         // println!("Candidate Matrix:\n{}", g.candidate_matrix());
 
         // Iterate over all candidates
-        for val in g.candidates_at(target).iter() {
-            if let Ok(candidates_changed) = g.update(target, *val) {
+        for val in g.candidates_at(target).into_iter() {
+            if let Ok(candidates_changed) = g.update(target, val) {
                 // If candidate valid, push decision onto history stack; continue while loop
                 history.push(Decision::new(
                     target,
-                    Cell::Filled(*val),
+                    Cell::Filled(val),
                     candidates_changed,
                     prev_cell_candidates,
                 ));
