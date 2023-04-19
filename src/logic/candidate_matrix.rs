@@ -1,6 +1,8 @@
 use std::fmt::Write;
 use std::{array, collections::HashSet, fmt};
 
+use rand::seq::SliceRandom;
+
 use super::{
     grid::get_box_coords_containing, puzzle::Coord, Cell, CELL_WIDTH, NUM_WIDTH, ORDER, SIZE,
 };
@@ -100,21 +102,29 @@ impl CandidateMatrix {
     }
 
     /// Gets the coordinates of the cell with the lowest possibilities in the
-    /// grid. Excludes cells with only 1 candidate as these must have values
+    /// grid. Excludes cells with already-set values (i.e. contain `0`).
     pub fn get_min_candidates_cell(&self) -> Coord {
-        let mut coords = Coord { row: 0, col: 0 };
-        let mut min = usize::MAX;
+        let rows_to_lens = |row: [HashSet<u8>; SIZE]| {
+            row.into_iter()
+                .map(|c| if c.contains(&0) { usize::MAX } else { c.len() })
+                .collect()
+        };
+        let lens: Vec<Vec<_>> = self.0.clone().into_iter().map(rows_to_lens).collect();
 
-        for (i, row) in self.0.iter().enumerate() {
-            for (j, candidates) in row.iter().enumerate() {
-                if !candidates.contains(&0) && candidates.len() < min {
-                    min = candidates.len();
-                    coords = Coord { row: i, col: j };
+        let mut coords: Vec<Coord> = Vec::new();
+
+        let min = lens.clone().into_iter().flatten().min();
+        lens.into_iter().enumerate().for_each(|(i, row)| {
+            row.into_iter().enumerate().for_each(|(j, c)| {
+                if Some(c) == min {
+                    coords.push((i, j).into());
                 }
-            }
-        }
+            })
+        });
 
-        coords
+        *coords
+            .choose(&mut rand::thread_rng())
+            .expect("There has to be a minimum")
     }
 
     pub fn undo_changed(&mut self, val: Cell, changed: Vec<Coord>) {
