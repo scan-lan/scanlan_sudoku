@@ -53,10 +53,6 @@ impl Puzzle {
     pub fn solution(&self) -> Option<String> {
         self.solution.as_ref().map(|s| format!("{}", s))
     }
-
-    pub fn get_row(&self, idx: usize) -> &Group {
-        self.grid.get_row(idx)
-    }
 }
 
 impl Default for Puzzle {

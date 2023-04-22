@@ -4,6 +4,7 @@ use super::{
     puzzle::Coord,
     Group, CELL_WIDTH, ORDER, SIZE,
 };
+
 use std::{array, collections::HashSet, fmt};
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
@@ -86,28 +87,8 @@ impl Grid {
         &self.rows
     }
 
-    pub fn cols(&self) -> &[Group; SIZE] {
-        &self.cols
-    }
-
-    pub fn boxes(&self) -> &[Group; SIZE] {
-        &self.boxes
-    }
-
     pub fn candidate_matrix(&self) -> &CandidateMatrix {
         &self.candidate_matrix
-    }
-
-    pub fn get_row(&self, idx: usize) -> &Group {
-        &self.rows[idx]
-    }
-
-    pub fn get_col(&self, idx: usize) -> &Group {
-        &self.cols[idx]
-    }
-
-    pub fn get_box(&self, idx: usize) -> &Group {
-        &self.boxes[idx]
     }
 
     pub fn get_cell(&self, cell: Coord) -> &Cell {

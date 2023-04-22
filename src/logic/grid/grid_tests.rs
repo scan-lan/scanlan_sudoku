@@ -22,14 +22,6 @@ fn get_box_containing_returns_correct_coords() {
 }
 
 #[test]
-fn get_row() {
-    let expected: Group = core::array::from_fn(|i| Cell::Clue((i + 1).try_into().unwrap()));
-    let g = Grid::from(get_base_solution());
-
-    assert_eq!(g.get_row(0), &expected);
-}
-
-#[test]
 fn update_cell() {
     let mut expected = [[Cell::Empty; SIZE]; SIZE];
     expected[4][4] = Cell::Filled(1);
