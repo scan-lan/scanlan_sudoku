@@ -46,7 +46,7 @@ pub fn solve_backtracking_heuristics(mut g: Grid) -> Option<Grid> {
 
                     g.remove_candidate(dec.2, dec.1);
                 }
-            },
+            }
             Ordering::Less => panic!("This should never happen"),
         }
     }
