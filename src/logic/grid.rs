@@ -62,27 +62,6 @@ impl Grid {
             && self.boxes.iter().all(different);
     }
 
-    pub fn from(rows: [Group; SIZE]) -> Grid {
-        let cols = rows.cols();
-        let boxes = rows.boxes();
-        let empty_cell_count = rows.iter().fold(0u8, |mut acc, row| {
-            acc += row.iter().filter(|c| c == &&Cell::Empty).count() as u8;
-            acc
-        });
-
-        let mut g = Grid {
-            rows,
-            cols,
-            boxes,
-            candidate_matrix: rows.into(),
-            empty_cell_count,
-            solved: false,
-        };
-
-        g.check_solved();
-        g
-    }
-
     pub fn rows(&self) -> &[Group; SIZE] {
         &self.rows
     }
@@ -162,6 +141,39 @@ impl Grid {
 
     pub fn candidates_at(&self, cell: Coord) -> Vec<u8> {
         self.candidate_matrix.get_candidates(cell)
+    }
+
+    pub fn from_rows(rows: [[Cell; SIZE]; SIZE]) -> Self {
+        let cols = rows.cols();
+        let boxes = rows.boxes();
+        let empty_cell_count = rows.iter().fold(0u8, |mut acc, row| {
+            acc += row.iter().filter(|c| c == &&Cell::Empty).count() as u8;
+            acc
+        });
+
+        let mut g = Grid {
+            rows,
+            cols,
+            boxes,
+            candidate_matrix: rows.into(),
+            empty_cell_count,
+            solved: false,
+        };
+
+        g.check_solved();
+        g
+    }
+}
+
+impl From<[[Cell; SIZE]; SIZE]> for Grid {
+    fn from(rows: [Group; SIZE]) -> Grid {
+        Self::from_rows(rows)
+    }
+}
+
+impl From<DisplayableGrid<Cell>> for Grid {
+    fn from(dg: DisplayableGrid<Cell>) -> Self {
+        Self::from_rows(dg.0)
     }
 }
 
