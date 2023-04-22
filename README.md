@@ -9,9 +9,9 @@
 - [ ] Puzzle generation
   - [ ] Difficulty settings
   - [ ] Checking puzzle validity
-- [ ] Solving interface
-  - [ ] Undo/redo
-  - [ ] Quit
+- [x] Solving interface
+  - [x] Undo/redo
+  - [x] Quit
 - [ ] Playing interface
   - [ ] Undo/redo
   - [ ] Timing

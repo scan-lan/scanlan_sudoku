@@ -4,49 +4,79 @@ use std::time::Instant;
 use crate::logic::{solve_backtracking_heuristics, Cell, Coord, DisplayableGrid, SIZE};
 
 use crate::logic::Grid;
-use crate::puzzles::HARD_GRID;
+// use crate::puzzles::HARD_GRID;
 
 pub fn run() {
-    // let g = grid_from_input();
-    let g = Grid::from(HARD_GRID);
+    let g = grid_from_input();
+    // let g = Grid::from(HARD_GRID);
     // let g = Grid::new();
-    println!("{}", g);
-    println!("{}", g.candidate_matrix());
+    match g {
+        None => {
+            println!("Thank you for playing.");
+            return;
+        },
+        Some(g) => {
+            println!("{}", g);
+            println!("{}", g.candidate_matrix());
 
-    let now = Instant::now();
-    let g_solved = solve_backtracking_heuristics(g);
-    println!("Solved in {:?}", now.elapsed());
+            let now = Instant::now();
+            let g_solved = solve_backtracking_heuristics(g);
+            println!("Solved in {:?}", now.elapsed());
 
-    if let Some(g) = g_solved {
-        println!("{}", g);
+            if let Some(g) = g_solved {
+                println!("{}", g);
+            }
+        }
     }
 }
 
-pub fn grid_from_input() -> Grid {
-    // get input etc etc
-    let mut new_grid = DisplayableGrid([[Cell::Empty; SIZE]; SIZE]);
-    for i in 0..SIZE {
-        for j in 0..SIZE {
-            let mut display_grid = new_grid.clone();
-            display_grid.0[i][j] = Cell::Clue(0);
-            println!("{}", display_grid);
-            println!(
-                "Please enter value for cell {}, marked with a '?'",
-                Coord::from((i + 1, j + 1))
-            );
-            new_grid.0[i][j] = prompt_for_value();
+/// Transforms a Vec into a grid. This will panic if the Vec is too small.
+fn grid_from_vec(v: Vec<Cell>) -> DisplayableGrid<Cell> {
+    DisplayableGrid(std::array::from_fn(|i| std::array::from_fn(|j| v[i * SIZE + j])))
+}
+
+/// Obtains a grid from user input. Returns `None` if the user quits.
+pub fn grid_from_input() -> Option<Grid> {
+    let mut input: Vec<Cell> = Vec::new();
+
+    let mut display_grid = DisplayableGrid([[Cell::Empty; SIZE]; SIZE]);
+    while input.len() != SIZE.pow(2) {
+        let (i, j) = (input.len() / SIZE, input.len() % SIZE);
+        display_grid.0[i][j] = Cell::Clue(0);
+        println!("{}", display_grid);
+        println!(
+            "Please enter value for cell {}, marked with a '?' ('u': undo; 'q': quit)",
+            Coord::from((i + 1, j + 1))
+        );
+
+        match prompt_for_value() {
+            PromptResponse::Val(c) => {
+                display_grid.0[i][j] = c;
+                input.push(c);
+            },
+            PromptResponse::Quit => {
+                return None;
+            }
+            PromptResponse::Undo => {
+                input.pop();
+                display_grid.0[i][j] = Cell::Empty;
+            }
         }
     }
 
-    let new_g = Grid::from(new_grid.0);
-    dbg!(&new_g);
-    new_g
+    let new_g = grid_from_vec(input).into();
+    Some(new_g)
 }
 
-fn prompt_for_value() -> Cell {
-    let mut val = Cell::Clue(0);
+#[derive(Debug)]
+enum PromptResponse<T> {
+    Quit,
+    Undo,
+    Val(T),
+}
 
-    while val == Cell::Clue(0) {
+fn prompt_for_value() -> PromptResponse<Cell> {
+    loop {
         let mut response = String::new();
         if let Err(e) = io::stdin().read_line(&mut response) {
             println!("Unexpected error: {e}\nPlease try again");
@@ -55,20 +85,26 @@ fn prompt_for_value() -> Cell {
         let response = response.trim();
 
         if response.is_empty() {
-            val = Cell::Empty;
+            return PromptResponse::Val(Cell::Empty);
         }
 
-        if let Ok(n) = response.parse::<u8>() {
-            if (1..=SIZE).contains(&(n as usize)) {
-                val = Cell::Clue(n);
-                break;
-            } else {
-                println!("Please enter a number in the range 1-{SIZE}");
-                continue;
+        match response {
+            "u" => {
+                return PromptResponse::Undo;
+            }
+            "q" => {
+                return PromptResponse::Quit;
+            }
+            _ => {
+                if let Ok(n) = response.parse::<u8>() {
+                    if (1..=SIZE).contains(&(n as usize)) {
+                        return PromptResponse::Val(Cell::Clue(n));
+                    }
+                }
+                println!("Please enter a value between 1 and {SIZE}");
             }
         }
     }
-    val
 }
 
 // fn prompt(opts: &str, default: char) -> char {
