@@ -15,7 +15,7 @@ pub fn run() {
 
     let now = Instant::now();
     let g_solved = solve_backtracking_heuristics(g);
-    println!("Solved in {}ms", now.elapsed().as_millis());
+    println!("Solved in {:?}", now.elapsed());
 
     if let Some(g) = g_solved {
         println!("{}", g);
