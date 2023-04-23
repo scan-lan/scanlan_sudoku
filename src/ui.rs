@@ -1,4 +1,5 @@
-use std::io;
+use std::collections::BTreeMap;
+use std::io::{self, Write};
 use std::time::Instant;
 
 use crate::logic::{solve_backtracking_heuristics, Cell, Coord, DisplayableGrid, SIZE};
@@ -17,7 +18,7 @@ pub fn run() {
         None => {
             println!("Thank you for playing.");
             return;
-        },
+        }
         Some(g) => {
             println!("{}", g);
             println!("{}", g.candidate_matrix());
@@ -41,12 +42,21 @@ enum Choice {
 
 fn main_menu() -> Choice {
     println!("{}{SMALL_TITLE}{}", "\n".repeat(4), "\n".repeat(4));
-    Choice::Play
+    let map = BTreeMap::from([
+        ('p', Choice::Play),
+        ('s', Choice::Solve),
+        ('q', Choice::Quit),
+    ]);
+    println!("Play a game [p] or solve a puzzle [s]?\n\n(Enter \"q\" at any time to quit)");
+
+    char_prompt("What would you like to do?", map, Some('p'))
 }
 
 /// Transforms a Vec into a grid. This will panic if the Vec is too small.
 fn grid_from_vec(v: Vec<Cell>) -> DisplayableGrid<Cell> {
-    DisplayableGrid(std::array::from_fn(|i| std::array::from_fn(|j| v[i * SIZE + j])))
+    DisplayableGrid(std::array::from_fn(|i| {
+        std::array::from_fn(|j| v[i * SIZE + j])
+    }))
 }
 
 /// Obtains a grid from user input. Returns `None` if the user quits.
@@ -67,7 +77,7 @@ pub fn grid_from_input() -> Option<Grid> {
             PromptResponse::Val(c) => {
                 display_grid.0[i][j] = c;
                 input.push(c);
-            },
+            }
             PromptResponse::Quit => {
                 return None;
             }
@@ -91,24 +101,41 @@ enum PromptResponse<T> {
 
 fn get_response() -> Option<String> {
     let mut response = String::new();
-    response = io::stdin().read_line(&mut response).map_err(|e| {
+    if let Err(e) = io::stdin().read_line(&mut response) {
         println!("Unexpected error: {e}\nPlease try again");
         return None;
-    });
-    response = response.trim().to_lowercase();
+    }
 
+    response = response.trim().to_lowercase();
     Some(response)
 }
 
-fn char_prompt(prompt: &str, chars: Vec<char>, default: Option<char>) -> Choice {
+fn format_chars<T>(map: BTreeMap<char, T>) -> String {
+    let mut s = String::from("[");
+    map.keys().enumerate().for_each(|(i, c)| {
+        s.push_str(&format!(
+            "{c}{}",
+            if i == map.len() - 1 { "]" } else { ", " }
+        ))
+    });
+    s
+}
+
+fn char_prompt<T>(prompt: &str, map: BTreeMap<char, T>, default: Option<char>) -> T {
+    let prompt = format!(
+        "{prompt} {}\n{}> ",
+        format_chars(map),
+        default.unwrap_or(char::default())
+    );
+
     loop {
-        let response = get_response();
+        print!("{}", prompt);
+        let _ = std::io::stdout().flush();
         if let Some(r) = get_response() {
             match r.as_str() {
-                "p" => { return Choice::Play; },
-                "s" => { return Choice::Solve; },
-                "q" => { return Choice::Quit; },
-                _ => {continue;},
+                _ => {
+                    continue;
+                }
             }
         }
     }
@@ -116,7 +143,7 @@ fn char_prompt(prompt: &str, chars: Vec<char>, default: Option<char>) -> Choice 
 
 fn prompt_for_value() -> PromptResponse<Cell> {
     loop {
-        if let Some(response) = get_response() { 
+        if let Some(response) = get_response() {
             if response.is_empty() {
                 return PromptResponse::Val(Cell::Empty);
             }
@@ -137,7 +164,8 @@ fn prompt_for_value() -> PromptResponse<Cell> {
                     println!("Please enter a value between 1 and {SIZE}");
                 }
             }
-        }}
+        }
+    }
 }
 
 // fn prompt(opts: &str, default: char) -> char {
@@ -182,10 +210,9 @@ __\\/\\\\\\///\\\\\\___\\/\\\\\\___\\/\\\\\\_
         _\\//////////___\\/////////____\\///////\\//_____\\/////_____\\///____\\///___\
 \\/////////___";
 
-const SMALL_TITLE: &str =
-"                   __      __
-   _______  ______/ /___  / /____  __
-  / ___/ / / / __  / __ \\/ //_/ / / /
- (__  ) /_/ / /_/ / /_/ / ,< / /_/ /
-/____/\\__,_/\\__,_/\\____/_/|_|\\__,_/";
-
+const SMALL_TITLE: &str = "   _____           _       _          
+  / ____|         | |     | |         
+ | (___  _   _  __| | ___ | | ___   _ 
+  \\___ \\| | | |/ _` |/ _ \\| |/ / | | |
+  ____) | |_| | (_| | (_) |   <| |_| |
+ |_____/ \\__,_|\\__,_|\\___/|_|\\_\\\\__,_| ";
