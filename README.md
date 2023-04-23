@@ -9,7 +9,7 @@
 - [x] Solving interface
   - [x] Undo/redo
   - [x] Quit
-- [ ] Main menu
+- [x] Main menu
 - [ ] Puzzle generation
   - [ ] Difficulty settings
   - [ ] Checking puzzle validity
