@@ -3,7 +3,7 @@ use std::collections::BTreeMap;
 use std::io::{self, Write};
 use std::time::Instant;
 
-use crate::logic::{solve_backtracking_heuristics, Cell, Coord, DisplayableGrid, SIZE};
+use crate::logic::{solve_backtracking_heuristics, Cell, Coord, DisplayableGrid, SIZE, generate, Difficulty};
 
 use crate::logic::Grid;
 // use crate::puzzles::HARD_GRID;
@@ -13,9 +13,13 @@ pub fn run() {
 
     match choice {
         Choice::Solve => solve(),
-        Choice::Play => todo!(),
-        Choice::Quit => {},
+        Choice::Play => play(),
+        Choice::Quit => {}
     }
+}
+
+fn play() {
+    let _g = generate(Difficulty::Medium);
 }
 
 fn solve() {
