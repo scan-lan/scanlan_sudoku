@@ -5,6 +5,7 @@ use super::{
     Group, CELL_WIDTH, ORDER, SIZE,
 };
 
+use colored::Colorize;
 use std::{array, collections::HashSet, fmt};
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
@@ -22,7 +23,7 @@ impl fmt::Display for Cell {
                 if n == &0 {
                     write!(f, "{:>width$}", '?')
                 } else {
-                    write!(f, "{:width$}", n)
+                    write!(f, "{:>width$}", n.to_string().bold())
                 }
             }
             Self::Filled(n) => write!(f, "{:width$}", n),
