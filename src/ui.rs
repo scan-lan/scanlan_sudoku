@@ -3,10 +3,12 @@ use std::collections::BTreeMap;
 use std::io::{self, Write};
 use std::time::Instant;
 
-use crate::logic::{solve_backtracking_heuristics, Cell, Coord, DisplayableGrid, SIZE, generate, Difficulty};
+use crate::logic::{
+    generate, solve_backtracking_heuristics, Cell, Coord, Difficulty, DisplayableGrid, SIZE,
+};
 
 use crate::logic::Grid;
-// use crate::puzzles::HARD_GRID;
+use crate::puzzles::HARD_GRID;
 
 pub fn run() {
     let choice = main_menu();
@@ -24,8 +26,6 @@ fn play() {
 
 fn solve() {
     let g = grid_from_input();
-    // let g = Grid::from(HARD_GRID);
-    // let g = Grid::new();
 
     match g {
         None => {
@@ -203,28 +203,6 @@ fn prompt_for_value() -> PromptResponse<Cell> {
         }
     }
 }
-
-// fn prompt(opts: &str, default: char) -> char {
-//     default
-// }
-
-// pub fn game_loop() {
-//     // solve or play
-//     let choice = prompt("ps", 'p');
-
-//     if choice == 'p' {
-//         // difficulty
-//         let difficulty = prompt("emh", 'm');
-
-//         // let p = Puzzle::new(difficulty);
-
-//         loop {
-//             // let coord = get_coord();
-//             // let val = get_val();
-//             // p.update(coord, val);
-//         }
-//     }
-// }
 
 const _BIG_TITLE: &str = "\
 ____________________________________/\\\\\\_____________________________\
