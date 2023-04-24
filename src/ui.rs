@@ -20,8 +20,24 @@ pub fn run() {
     }
 }
 
+fn difficulty_menu() -> Option<Difficulty> {
+    let msg = "Select puzzle difficulty:\n\n- Easy [e]\n- Medium [m]\n- Hard[h]";
+    let map = BTreeMap::from([
+        ('e', Some(Difficulty::Easy)),
+        ('m', Some(Difficulty::Medium)),
+        ('h', Some(Difficulty::Hard)),
+        ('q', None),
+    ]);
+
+    char_prompt(msg, map, Some('m'))
+}
+
 fn play() {
-    let _g = generate(Difficulty::Medium);
+    if let Some(difficulty) = difficulty_menu() {
+        let _g = generate(difficulty);
+    } else {
+        println!("{THANK_YOU}");
+    }
 }
 
 fn solve() {
@@ -29,7 +45,7 @@ fn solve() {
 
     match g {
         None => {
-            println!("Thank you for playing.");
+            println!("{THANK_YOU}");
             return;
         }
         Some(g) => {
@@ -203,6 +219,8 @@ fn prompt_for_value() -> PromptResponse<Cell> {
         }
     }
 }
+
+const THANK_YOU: &str = "Thank you for playing.";
 
 const _BIG_TITLE: &str = "\
 ____________________________________/\\\\\\_____________________________\

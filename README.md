@@ -10,8 +10,8 @@
   - [x] Undo/redo
   - [x] Quit
 - [x] Main menu
-- [ ] Puzzle generation
-  - [ ] Difficulty settings
+- [x] Puzzle generation
+  - [x] Difficulty settings
   - [ ] Checking puzzle validity
 - [ ] Playing interface
   - [ ] Undo/redo

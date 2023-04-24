@@ -6,6 +6,7 @@ use super::{solve_backtracking_heuristics, Grid};
 
 use rand::seq::{IteratorRandom, SliceRandom};
 
+#[derive(Debug, Copy, Clone)]
 pub enum Difficulty {
     Easy,
     Medium,
