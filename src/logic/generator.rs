@@ -38,6 +38,7 @@ pub fn generate(d: Difficulty) -> Grid {
         .for_each(|coord| {
             let _ = g.clear(*coord);
         });
+    g.set_clues();
 
     println!("{g}");
     g

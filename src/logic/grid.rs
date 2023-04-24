@@ -164,6 +164,21 @@ impl Grid {
         g.check_solved();
         g
     }
+
+    /// Set all `Filled` cells to `Clue`s of the same value. Used in puzzle
+    /// generation.
+    pub fn set_clues(&mut self) {
+        for row in 0..SIZE {
+            for col in 0..SIZE {
+                if let Cell::Filled(val) = self.rows[row][col] {
+                    let box_coords = row_coords_to_box_coords((row, col).into());
+                    self.rows[row][col] = Cell::Clue(val);
+                    self.cols[col][row] = Cell::Clue(val);
+                    self.boxes[box_coords.row][box_coords.col] = Cell::Clue(val);
+                }
+            }
+        }
+    }
 }
 
 impl From<[[Cell; SIZE]; SIZE]> for Grid {
