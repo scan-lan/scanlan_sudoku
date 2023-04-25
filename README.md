@@ -10,6 +10,7 @@
   - [x] Undo/redo
   - [x] Quit
 - [x] Main menu
+    - [ ] Enter puzzle option when playing
 - [x] Puzzle generation
   - [x] Difficulty settings
   - [ ] Checking puzzle validity
