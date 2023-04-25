@@ -98,7 +98,7 @@ impl Grid {
     /// candidates. Changes to candidates are rolled back if an error occurs.
     /// Returns the coordinates of all cells whose candidates were changed by
     /// the update.
-    pub fn update(&mut self, cell: Coord, val: u8) -> Result<Vec<Coord>, GridError> {
+    pub fn update(&mut self, cell: Coord, val: u8) -> Result<(), GridError> {
         if let Cell::Clue(_) = self.get_cell(cell) {
             return Err(GridError::new(ErrorKind::UpdatedClue, cell, val));
         } else if let Cell::Empty = self.get_cell(cell) {
@@ -110,20 +110,13 @@ impl Grid {
         self.cols[cell.col][cell.row] = Cell::Filled(val);
         self.boxes[box_row][box_col] = Cell::Filled(val);
 
-        // Creates a copy of candidate matrix in case the update is invalid
-        let cm_backup = self.candidate_matrix.clone();
         self.candidate_matrix.set_fixed(cell);
         let result = self
             .candidate_matrix
             .update_around(cell, val)
             .map_err(|_| GridError::new(ErrorKind::ZeroCandidates, cell, val));
 
-        if result.is_err() {
-            // Revert to the copied version
-            self.candidate_matrix = cm_backup;
-        } else {
-            self.check_solved();
-        }
+        self.check_solved();
 
         result
     }

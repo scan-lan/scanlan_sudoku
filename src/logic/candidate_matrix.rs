@@ -46,40 +46,29 @@ impl CandidateMatrix {
     /// Update the candidate sets for each group containing `cell`. Returns a
     /// deduplicated vector of coordinates of all candidate sets changed by the
     /// update.
-    pub fn update_around(&mut self, cell: Coord, val: u8) -> Result<Vec<Coord>, ()> {
-        let mut changed = vec![];
-
+    pub fn update_around(&mut self, cell: Coord, val: u8) -> Result<(), ()> {
         for (col_i, candidates) in self.0[cell.row].iter_mut().enumerate() {
-            if candidates.remove(&val) {
-                changed.push((cell.row, col_i).into());
-            }
+            candidates.remove(&val);
             if candidates.is_empty() {
                 return Err(());
             }
         }
 
         for (row_i, row) in self.0.iter_mut().enumerate() {
-            if row[cell.col].remove(&val) {
-                changed.push((row_i, cell.col).into())
-            }
+            row[cell.col].remove(&val);
             if row[cell.col].is_empty() {
                 return Err(());
             }
         }
 
         for coord in get_box_coords_containing(cell).into_iter() {
-            if self.0[coord.row][coord.col].remove(&val) {
-                changed.push(coord);
-            }
+            self.0[coord.row][coord.col].remove(&val);
             if self.0[coord.row][coord.col].is_empty() {
                 return Err(());
             }
         }
 
-        changed.sort();
-        changed.dedup();
-
-        Ok(changed)
+        Ok(())
     }
 
     pub fn collapse(&mut self, cell: Coord) -> u8 {
