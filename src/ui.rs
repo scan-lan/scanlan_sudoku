@@ -1,7 +1,7 @@
 use std::cmp::Ordering;
 use std::collections::BTreeMap;
 use std::io::{self, Write};
-use std::time::Instant;
+use std::time;
 
 use crate::logic::{
     generate, solve_backtracking_heuristics, Cell, Coord, Difficulty, DisplayableGrid, SIZE,
@@ -9,6 +9,8 @@ use crate::logic::{
 
 use crate::logic::Grid;
 use crate::puzzles::HARD_GRID;
+use lazy_static::lazy_static;
+use regex::Regex;
 
 pub fn run() {
     let choice = main_menu();
@@ -34,10 +36,66 @@ fn difficulty_menu() -> Option<Difficulty> {
 
 fn play() {
     if let Some(difficulty) = difficulty_menu() {
-        let _g = generate(difficulty);
+        let g = generate(difficulty);
+        let result = game_loop(g); // solved or quit
     } else {
         println!("{THANK_YOU}");
     }
+}
+
+enum Game {
+    Solved(time::Duration),
+    Quit,
+}
+
+fn game_loop(mut g: Grid) -> Game {
+    let now = time::Instant::now();
+    while !g.solved {
+        println!("{g}");
+        if let Some(cell) = get_coord() {
+            if let Some(val) = get_val() {
+                if let Err(e) = g.update(cell, val) {
+                    println!("{e}");
+                } else {
+                    println!("{g}");
+                }
+            } else {
+                return Game::Quit;
+            }
+        } else {
+            return Game::Quit;
+        }
+    }
+    return Game::Solved(now.elapsed());
+}
+
+fn get_coord() -> Option<Coord> {
+    lazy_static! {
+        static ref COORD_REGEX: Regex = Regex::new(r"^\D*(?P<row>\d)\D*(?P<col>\d)\D*$").unwrap();
+    }
+    loop {
+        let r = get_response("> ");
+        if r == "q" {
+            return None;
+        }
+        let r = COORD_REGEX.captures(&r);
+
+        match r {
+            None => {
+                println!("Invalid format, please provide cell as \"<row> <col>\"");
+            }
+            Some(caps) => {
+                let (row, col) = (&caps["row"], &caps["col"]);
+                if let (Ok(r), Ok(c)) = (row.parse::<usize>(), col.parse::<usize>()) {
+                    return Some(Coord::from((r, c)));
+                }
+            }
+        }
+    }
+}
+
+fn get_val() -> Option<u8> {
+    todo!()
 }
 
 fn solve() {
@@ -52,7 +110,7 @@ fn solve() {
             println!("{}", g);
             println!("{}", g.candidate_matrix());
 
-            let now = Instant::now();
+            let now = time::Instant::now();
             let g_solved = solve_backtracking_heuristics(g);
             println!("Solved in {:?}", now.elapsed());
 
