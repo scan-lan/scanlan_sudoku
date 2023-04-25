@@ -98,12 +98,12 @@ pub fn grid_from_input() -> Option<Grid> {
         let (i, j) = (input.len() / SIZE, input.len() % SIZE);
         display_grid.0[i][j] = Cell::Clue(0);
         println!("{}", display_grid);
-        println!(
-            "Please enter value for cell {}, marked with a '?' ('u': undo; 'q': quit)",
+        let prompt = format!(
+            "Please enter value for cell {}, marked with a '?' ('u': undo; 'q': quit)\n> ",
             Coord::from((i + 1, j + 1))
         );
 
-        match prompt_for_value() {
+        match prompt_for_value(&prompt) {
             PromptResponse::Val(c) => {
                 display_grid.0[i][j] = c;
                 input.push(c);
@@ -129,8 +129,11 @@ enum PromptResponse<T> {
     Val(T),
 }
 
-fn get_response() -> String {
+fn get_response(prompt: &str) -> String {
     loop {
+        print!("{prompt}");
+        let _ = std::io::stdout().flush();
+
         let mut response = String::new();
         if let Err(e) = io::stdin().read_line(&mut response) {
             println!("Unexpected error: {e}\nPlease try again");
@@ -140,9 +143,9 @@ fn get_response() -> String {
     }
 }
 
-fn get_char_response() -> char {
+fn get_char_response(prompt: &str) -> char {
     loop {
-        let resp = get_response();
+        let resp = get_response(prompt);
         match resp.len().cmp(&1) {
             Ordering::Greater => println!("Answer too long, enter a single character please"),
             Ordering::Equal => return resp.chars().next().unwrap_or_default(),
@@ -178,10 +181,7 @@ where
     );
 
     loop {
-        print!("{}", prompt);
-        let _ = std::io::stdout().flush();
-
-        let c = get_char_response();
+        let c = get_char_response(&prompt);
         if let Some(val) = map.get(&c) {
             return *val;
         } else if c == ' ' {
@@ -194,9 +194,9 @@ where
     }
 }
 
-fn prompt_for_value() -> PromptResponse<Cell> {
+fn prompt_for_value(prompt: &str) -> PromptResponse<Cell> {
     loop {
-        let response = get_response();
+        let response = get_response(prompt);
         if response.is_empty() {
             return PromptResponse::Val(Cell::Empty);
         }
