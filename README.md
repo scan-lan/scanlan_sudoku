@@ -14,10 +14,10 @@
 - [x] Puzzle generation
   - [x] Difficulty settings
   - [ ] Checking puzzle validity
-- [ ] Playing interface
+- [x] Playing interface
   - [x] Quit whilst inputting coord
   - [x] Grid with numbers
-  - [ ] Undo/redo
-  - [ ] Timing
+  - [x] Undo/redo
+  - [x] Timing
   - [ ] Setting time constraints
 

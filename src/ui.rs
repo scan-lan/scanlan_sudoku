@@ -63,69 +63,107 @@ enum Game {
 }
 
 fn game_loop(mut g: Grid) -> Game {
+    let mut undo_history: Vec<Grid> = Vec::new();
+    let mut redo_history: Vec<Grid> = Vec::new();
     let now = time::Instant::now();
+
     println!("{g}");
     println!("{HOW_TO}\n");
+
     while !g.solved {
-        // get coord
-        if let Some(user_cell) = get_coord() {
-            // adjust coord to match the zero-based array
-            let acc_cell = Coord::from((user_cell.row - 1, user_cell.col - 1));
-
-            // show user the grid they've chosen
-            let mut display_g = DisplayableGrid(g.rows().clone());
-            display_g.0[acc_cell.row][acc_cell.col] = Cell::Clue(0);
-            println!("{display_g}\nCell {user_cell} marked with \"?\"");
-
-            match prompt_for_value(&format!("Enter the value for cell {user_cell}\n> "), false) {
-                PromptResponse::Val(val) => {
-                    if let Cell::Filled(n) = val {
-                        if let Err(e) = g.update(acc_cell, n) {
-                            println!("{e}");
-                        } else {
-                            println!("{g}");
-                        }
+        match get_move(&g) {
+            PromptResponse::Val((cell, val)) => {
+                if let Cell::Filled(n) = val {
+                    let cur_g = g.clone();
+                    if let Err(e) = g.update(cell, n) {
+                        println!("{e}");
+                    } else {
+                        undo_history.push(cur_g);
+                        redo_history.clear();
+                        println!("\n{g}\n");
                     }
                 }
-                PromptResponse::Undo => {
-                    todo!()
-                }
-                PromptResponse::Quit => return Game::Quit,
             }
-        } else {
-            return Game::Quit;
+
+            PromptResponse::Undo => match undo_history.pop() {
+                Some(last_g) => {
+                    redo_history.push(g.clone());
+                    g = last_g;
+                    println!("Move undone:\n\n{g}");
+                }
+                None => {
+                    println!("No more moves to undo");
+                }
+            },
+
+            PromptResponse::Redo => match redo_history.pop() {
+                Some(next_g) => {
+                    undo_history.push(g);
+                    g = next_g;
+                    println!("Move redone:\n\n{g}");
+                }
+                None => println!("No more moves to redo"),
+            },
+            PromptResponse::Quit => return Game::Quit,
         }
     }
     Game::Solved(now.elapsed())
 }
 
-fn get_coord() -> Option<Coord> {
+fn get_move(g: &Grid) -> PromptResponse<(Coord, Cell)> {
+    loop {
+        match get_coord() {
+            PromptResponse::Val(user_cell) => {
+                // adjust coord to match the zero-based array
+                let acc_cell = Coord::from((user_cell.row - 1, user_cell.col - 1));
+
+                // show user the grid they've chosen
+                let mut display_g = DisplayableGrid(g.rows().clone());
+                display_g.0[acc_cell.row][acc_cell.col] = Cell::Clue(0);
+                println!("{display_g}\nCell {user_cell} marked with \"?\"");
+
+                match prompt_for_value(&format!("Enter the value for cell {user_cell}\n> "), false)
+                {
+                    PromptResponse::Val(val) => return PromptResponse::Val((acc_cell, val)),
+                    PromptResponse::Undo => return PromptResponse::Undo,
+                    PromptResponse::Redo => return PromptResponse::Redo,
+                    PromptResponse::Quit => return PromptResponse::Quit,
+                }
+            }
+            PromptResponse::Undo => return PromptResponse::Undo,
+            PromptResponse::Redo => return PromptResponse::Redo,
+            PromptResponse::Quit => return PromptResponse::Quit,
+        }
+    }
+}
+
+fn get_coord() -> PromptResponse<Coord> {
     lazy_static! {
         static ref COORD_REGEX: Regex = Regex::new(r"^\D*(?P<row>\d)\D*(?P<col>\d)\D*$").unwrap();
     }
     loop {
         let r = get_response("Enter cell (format: \"row col\")\n> ");
-        if r == "q" {
-            return None;
-        }
-        let r = COORD_REGEX.captures(&r);
+        match r.as_str() {
+            "u" => return PromptResponse::Undo,
+            "r" => return PromptResponse::Redo,
+            "q" => return PromptResponse::Quit,
+            _ => {
+                let r = COORD_REGEX.captures(&r);
 
-        match r {
-            None => {
-                println!("Invalid format, please provide cell as \"<row> <col>\"");
-            }
-            Some(caps) => {
-                let (row, col) = (&caps["row"], &caps["col"]);
-                if let (Ok(r), Ok(c)) = (row.parse::<usize>(), col.parse::<usize>()) {
-                    return Some(Coord::from((r, c)));
+                match r {
+                    None => {
+                        println!("Invalid format, please provide cell as \"<row> <col>\"");
+                    }
+                    Some(caps) => {
+                        let (row, col) = (&caps["row"], &caps["col"]);
+                        if let (Ok(r), Ok(c)) = (row.parse::<usize>(), col.parse::<usize>()) {
+                            return PromptResponse::Val(Coord::from((r, c)));
+                        }
+                    }
                 }
             }
-        }
+        };
     }
-}
-
-fn get_val() -> Option<u8> {
-    todo!()
 }
 
 fn solve() {
@@ -180,6 +218,7 @@ fn grid_from_vec(v: Vec<Cell>) -> DisplayableGrid<Cell> {
 /// Obtains a grid from user input. Returns `None` if the user quits.
 pub fn grid_from_input() -> Option<Grid> {
     let mut input: Vec<Cell> = Vec::new();
+    let mut redo_stack = Vec::new();
 
     let mut display_grid = DisplayableGrid([[Cell::Empty; SIZE]; SIZE]);
     while input.len() != SIZE.pow(2) {
@@ -195,14 +234,25 @@ pub fn grid_from_input() -> Option<Grid> {
             PromptResponse::Val(c) => {
                 display_grid.0[i][j] = c;
                 input.push(c);
+                redo_stack.clear();
             }
             PromptResponse::Quit => {
                 return None;
             }
-            PromptResponse::Undo => {
-                input.pop();
-                display_grid.0[i][j] = Cell::Empty;
-            }
+            PromptResponse::Undo => match input.pop() {
+                None => println!("No more moves to undo"),
+                Some(last_move) => {
+                    redo_stack.push(last_move);
+                    display_grid.0[i][j] = Cell::Empty;
+                }
+            },
+            PromptResponse::Redo => match redo_stack.pop() {
+                None => println!("No more moves to redo"),
+                Some(next_move) => {
+                    input.push(next_move);
+                    display_grid.0[i][j] = next_move;
+                }
+            },
         }
     }
 
@@ -214,6 +264,7 @@ pub fn grid_from_input() -> Option<Grid> {
 enum PromptResponse<T> {
     Quit,
     Undo,
+    Redo,
     Val(T),
 }
 
@@ -290,12 +341,9 @@ fn prompt_for_value(prompt: &str, is_clue: bool) -> PromptResponse<Cell> {
         }
 
         match response.as_str() {
-            "u" => {
-                return PromptResponse::Undo;
-            }
-            "q" => {
-                return PromptResponse::Quit;
-            }
+            "u" => return PromptResponse::Undo,
+            "r" => return PromptResponse::Redo,
+            "q" => return PromptResponse::Quit,
             _ => {
                 if let Ok(n) = response.parse::<u8>() {
                     if (1..=SIZE).contains(&(n as usize)) {
