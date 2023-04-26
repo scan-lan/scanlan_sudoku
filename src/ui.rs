@@ -48,12 +48,33 @@ fn play() {
         println!("Took {:?}\n", time_taken);
         match game_loop(g) {
             Game::Solved(solve_time) => {
-                println!("Congratulations! You solved the puzzle in {:?}", solve_time);
+                let solve_secs = solve_time.as_secs();
+                println!(
+                    "Congratulations! You solved the puzzle in {}",
+                    format_time(solve_secs)
+                );
             }
             Game::Quit => println!("{THANK_YOU}"),
         }
     } else {
         println!("{THANK_YOU}");
+    }
+}
+
+fn format_time(t: u64) -> String {
+    let secs = t % 60;
+    let show_s_secs = if secs != 1 { "s" } else { "" };
+    let mins = t % 3600 / 60;
+    let show_s_mins = if mins != 1 { "s" } else { "" };
+    let hrs = t / 3600;
+    let show_s_hrs = if hrs != 1 { "s" } else { "" };
+
+    match t {
+        0..=59 => format!("{secs} second{show_s_secs}"),
+        60..=3599 => format!("{mins} minute{show_s_mins}, {secs} second{show_s_secs}"),
+        3600.. => format!(
+            "{hrs} hour{show_s_hrs}, {mins} minute{show_s_mins}, {secs} second{show_s_secs}"
+        ),
     }
 }
 
