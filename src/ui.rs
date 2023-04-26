@@ -86,9 +86,11 @@ fn game_loop(mut g: Grid) -> Game {
                 }
                 PromptResponse::Quit => return Game::Quit,
             }
+        } else {
+            return Game::Quit;
         }
     }
-    return Game::Solved(now.elapsed());
+    Game::Solved(now.elapsed())
 }
 
 fn get_coord() -> Option<Coord> {

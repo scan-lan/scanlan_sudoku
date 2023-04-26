@@ -15,7 +15,8 @@
   - [x] Difficulty settings
   - [ ] Checking puzzle validity
 - [ ] Playing interface
-  - [ ] Quit whilst inputting coord
+  - [x] Quit whilst inputting coord
+  - [ ] Grid with numbers
   - [ ] Undo/redo
   - [ ] Timing
   - [ ] Setting time constraints
