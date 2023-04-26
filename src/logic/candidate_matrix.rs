@@ -47,14 +47,14 @@ impl CandidateMatrix {
     /// deduplicated vector of coordinates of all candidate sets changed by the
     /// update.
     pub fn update_around(&mut self, cell: Coord, val: u8) -> Result<(), ()> {
-        for (col_i, candidates) in self.0[cell.row].iter_mut().enumerate() {
+        for candidates in self.0[cell.row].iter_mut() {
             candidates.remove(&val);
             if candidates.is_empty() {
                 return Err(());
             }
         }
 
-        for (row_i, row) in self.0.iter_mut().enumerate() {
+        for row in self.0.iter_mut() {
             row[cell.col].remove(&val);
             if row[cell.col].is_empty() {
                 return Err(());

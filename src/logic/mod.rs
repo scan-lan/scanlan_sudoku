@@ -1,14 +1,11 @@
-pub const ORDER: usize = 3;
-pub const SIZE: usize = ORDER.pow(2);
-const NUM_WIDTH: u32 = SIZE.ilog10() + 1;
-const CELL_WIDTH: u32 = NUM_WIDTH + 1;
-
 pub use generator::{generate, Difficulty};
 pub use grid::{get_base_solution, Cell, Grid};
 pub use grid_trait::DisplayableGrid;
 pub use puzzle::{Coord, Puzzle};
 pub use solver::solve_backtracking_heuristics;
 pub use types::Move;
+
+pub use crate::{CELL_WIDTH, NUM_WIDTH, ORDER, SIZE};
 
 type Group = [grid::Cell; SIZE];
 

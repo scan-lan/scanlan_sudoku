@@ -1,6 +1,6 @@
 use std::fmt;
 
-use super::{get_base_solution, Grid, Group};
+use super::{get_base_solution, Grid};
 
 #[derive(PartialEq, Eq, Clone, Copy, PartialOrd, Ord)]
 pub struct Coord {
