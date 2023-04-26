@@ -223,9 +223,9 @@ pub fn grid_from_input() -> Option<Grid> {
     while input.len() != SIZE.pow(2) {
         let (i, j) = (input.len() / SIZE, input.len() % SIZE);
         display_grid.0[i][j] = Cell::Clue(0);
-        println!("{}", display_grid);
+        println!("\n{}\n", display_grid);
         let prompt = format!(
-            "Please enter value for cell {}, marked with a '?' ('u': undo; 'q': quit)\n> ",
+            "Please enter value for cell {}, marked with a '?' ([u]ndo, [r]edo, [q]uit)\n> ",
             Coord::from((i + 1, j + 1))
         );
 
