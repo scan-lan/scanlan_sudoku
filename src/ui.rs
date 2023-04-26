@@ -176,7 +176,6 @@ fn solve() {
         }
         Some(g) => {
             println!("{}", g);
-            println!("{}", g.candidate_matrix());
 
             let now = time::Instant::now();
             let g_solved = solve_backtracking_heuristics(g);
