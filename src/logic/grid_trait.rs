@@ -29,16 +29,30 @@ impl<T: fmt::Display> fmt::Display for DisplayableGrid<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let cell_width = CELL_WIDTH as usize;
         let box_width: usize = cell_width * ORDER + cell_width - 1;
+        let gutter_width = cell_width * 2;
 
         for (i, row) in self.0.iter().enumerate() {
+            write!(f, "{:^gutter_width$}", i + 1)?;
             for (j, cell) in row.iter().enumerate() {
                 write!(f, "{:>cell_width$}", cell)?;
                 if j != SIZE - 1 && j % ORDER == ORDER - 1 {
                     write!(f, "{:>cell_width$}", "|")?;
                 }
             }
+
             writeln!(f)?;
-            if i != SIZE - 1 && i % ORDER == ORDER - 1 {
+            if i == SIZE - 1 {
+                // offset by cell width to fit the numbers down the side
+                write!(f, "\n{:^gutter_width$}", " ")?;
+                for col_index in 1..=SIZE {
+                    write!(f, "{:>cell_width$}", col_index)?;
+                    if col_index != SIZE && (col_index - 1) % ORDER == ORDER - 1 {
+                        write!(f, "{:>cell_width$}", "|")?;
+                    }
+                }
+            } else if i % ORDER == ORDER - 1 {
+                // offset to fit the numbers down the side
+                write!(f, "{:^gutter_width$}", " ")?;
                 let line = format!("{:->box_width$}", "-");
                 for _ in 1..ORDER {
                     write!(f, "{line}+")?;

@@ -67,14 +67,20 @@ fn game_loop(mut g: Grid) -> Game {
     println!("{g}");
     println!("{HOW_TO}\n");
     while !g.solved {
-        if let Some(cell) = get_coord() {
+        // get coord
+        if let Some(user_cell) = get_coord() {
+            // adjust coord to match the zero-based array
+            let acc_cell = Coord::from((user_cell.row - 1, user_cell.col - 1));
+
+            // show user the grid they've chosen
             let mut display_g = DisplayableGrid(g.rows().clone());
-            display_g.0[cell.row][cell.col] = Cell::Clue(0);
-            println!("{display_g}\nCell {cell} marked with \"?\"");
-            match prompt_for_value(&format!("Enter the value for cell {cell}\n> "), false) {
+            display_g.0[acc_cell.row][acc_cell.col] = Cell::Clue(0);
+            println!("{display_g}\nCell {user_cell} marked with \"?\"");
+
+            match prompt_for_value(&format!("Enter the value for cell {user_cell}\n> "), false) {
                 PromptResponse::Val(val) => {
                     if let Cell::Filled(n) = val {
-                        if let Err(e) = g.update(cell, n) {
+                        if let Err(e) = g.update(acc_cell, n) {
                             println!("{e}");
                         } else {
                             println!("{g}");
