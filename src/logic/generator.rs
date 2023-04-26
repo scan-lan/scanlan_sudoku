@@ -1,4 +1,7 @@
-use std::array;
+use std::{
+    array,
+    time::{Duration, Instant},
+};
 
 use crate::logic::{Coord, SIZE};
 
@@ -13,7 +16,8 @@ pub enum Difficulty {
     Hard,
 }
 
-pub fn generate(d: Difficulty) -> Grid {
+pub fn generate(d: Difficulty) -> (Grid, Duration) {
+    let now = Instant::now();
     let mut g = solve_backtracking_heuristics(Grid::new()).unwrap();
     let coords: [[Coord; SIZE]; SIZE] = array::from_fn(|i| array::from_fn(|j| (i, j).into()));
     let coords = coords.flatten();
@@ -41,6 +45,5 @@ pub fn generate(d: Difficulty) -> Grid {
         });
     g.set_clues();
 
-    println!("{g}");
-    g
+    (g, now.elapsed())
 }

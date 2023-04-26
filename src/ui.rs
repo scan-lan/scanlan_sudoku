@@ -8,7 +8,7 @@ use crate::logic::{
 };
 
 use crate::logic::Grid;
-use crate::puzzles::HARD_GRID;
+// use crate::puzzles::HARD_GRID;
 use lazy_static::lazy_static;
 use regex::Regex;
 
@@ -23,7 +23,7 @@ pub fn run() {
 }
 
 fn difficulty_menu() -> Option<Difficulty> {
-    let msg = "Select puzzle difficulty:\n\n- Easy [e]\n- Medium [m]\n- Hard[h]";
+    let msg = "\nSelect puzzle difficulty:\n\n- Easy [e]\n- Medium [m]\n- Hard[h]\n";
     let map = BTreeMap::from([
         ('e', Some(Difficulty::Easy)),
         ('m', Some(Difficulty::Medium)),
@@ -36,8 +36,22 @@ fn difficulty_menu() -> Option<Difficulty> {
 
 fn play() {
     if let Some(difficulty) = difficulty_menu() {
-        let g = generate(difficulty);
-        let result = game_loop(g); // solved or quit
+        println!(
+            "\nGenerating a puzzle with difficulty: {}",
+            match difficulty {
+                Difficulty::Easy => "easy",
+                Difficulty::Medium => "medium",
+                Difficulty::Hard => "hard",
+            }
+        );
+        let (g, time_taken) = generate(difficulty);
+        println!("Took {:?}\n", time_taken);
+        match game_loop(g) {
+            Game::Solved(solve_time) => {
+                println!("Congratulations! You solved the puzzle in {:?}", solve_time);
+            }
+            Game::Quit => println!("{THANK_YOU}"),
+        }
     } else {
         println!("{THANK_YOU}");
     }
@@ -50,20 +64,28 @@ enum Game {
 
 fn game_loop(mut g: Grid) -> Game {
     let now = time::Instant::now();
+    println!("{g}");
+    println!("{HOW_TO}\n");
     while !g.solved {
-        println!("{g}");
         if let Some(cell) = get_coord() {
-            if let Some(val) = get_val() {
-                if let Err(e) = g.update(cell, val) {
-                    println!("{e}");
-                } else {
-                    println!("{g}");
+            let mut display_g = DisplayableGrid(g.rows().clone());
+            display_g.0[cell.row][cell.col] = Cell::Clue(0);
+            println!("{display_g}\nCell {cell} marked with \"?\"");
+            match prompt_for_value(&format!("Enter the value for cell {cell}\n> "), false) {
+                PromptResponse::Val(val) => {
+                    if let Cell::Filled(n) = val {
+                        if let Err(e) = g.update(cell, n) {
+                            println!("{e}");
+                        } else {
+                            println!("{g}");
+                        }
+                    }
                 }
-            } else {
-                return Game::Quit;
+                PromptResponse::Undo => {
+                    todo!()
+                }
+                PromptResponse::Quit => return Game::Quit,
             }
-        } else {
-            return Game::Quit;
         }
     }
     return Game::Solved(now.elapsed());
@@ -74,7 +96,7 @@ fn get_coord() -> Option<Coord> {
         static ref COORD_REGEX: Regex = Regex::new(r"^\D*(?P<row>\d)\D*(?P<col>\d)\D*$").unwrap();
     }
     loop {
-        let r = get_response("> ");
+        let r = get_response("Enter cell (format: \"row col\")\n> ");
         if r == "q" {
             return None;
         }
@@ -161,7 +183,7 @@ pub fn grid_from_input() -> Option<Grid> {
             Coord::from((i + 1, j + 1))
         );
 
-        match prompt_for_value(&prompt) {
+        match prompt_for_value(&prompt, true) {
             PromptResponse::Val(c) => {
                 display_grid.0[i][j] = c;
                 input.push(c);
@@ -252,7 +274,7 @@ where
     }
 }
 
-fn prompt_for_value(prompt: &str) -> PromptResponse<Cell> {
+fn prompt_for_value(prompt: &str, is_clue: bool) -> PromptResponse<Cell> {
     loop {
         let response = get_response(prompt);
         if response.is_empty() {
@@ -269,7 +291,11 @@ fn prompt_for_value(prompt: &str) -> PromptResponse<Cell> {
             _ => {
                 if let Ok(n) = response.parse::<u8>() {
                     if (1..=SIZE).contains(&(n as usize)) {
-                        return PromptResponse::Val(Cell::Clue(n));
+                        return if is_clue {
+                            PromptResponse::Val(Cell::Clue(n))
+                        } else {
+                            PromptResponse::Val(Cell::Filled(n))
+                        };
                     }
                 }
                 println!("Please enter a value between 1 and {SIZE}");
@@ -279,6 +305,11 @@ fn prompt_for_value(prompt: &str) -> PromptResponse<Cell> {
 }
 
 const THANK_YOU: &str = "Thank you for playing.";
+
+const HOW_TO: &str = "Enter numbers using the row/column indices to the left and below \
+            the puzzle.\nFor example, the centre cell of the grid is at 5, 5.\
+            The centre cell of the box to its left is 5, 2.\n\nWhen guessing,\
+            enter the cell as \"row<space>column\", e.g. \"8 3\"";
 
 const _BIG_TITLE: &str = r"____________________________________/\\\_____________________________ _______________
  ___________________________________\/\\\\_________________/\\\\__________________ _____

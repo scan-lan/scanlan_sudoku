@@ -87,6 +87,7 @@ impl Grid {
                 self.cols[col][row] = Cell::Empty;
                 self.boxes[box_row][box_col] = Cell::Empty;
                 self.empty_cell_count += 1;
+                self.check_solved();
 
                 Ok(())
             }
