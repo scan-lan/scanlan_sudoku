@@ -38,7 +38,7 @@ pub struct Grid {
     cols: [Group; SIZE],
     boxes: [Group; SIZE],
     candidate_matrix: CandidateMatrix,
-    pub empty_cell_count: u8,
+    pub empty_cell_count: usize,
     pub solved: bool,
 }
 
@@ -49,7 +49,7 @@ impl Grid {
             cols: [[Cell::Empty; SIZE]; SIZE],
             boxes: [[Cell::Empty; SIZE]; SIZE],
             candidate_matrix: CandidateMatrix::new(),
-            empty_cell_count: SIZE.pow(2) as u8,
+            empty_cell_count: SIZE.pow(2),
             solved: false,
         }
     }
@@ -141,8 +141,8 @@ impl Grid {
     pub fn from_rows(rows: [[Cell; SIZE]; SIZE]) -> Self {
         let cols = rows.cols();
         let boxes = rows.boxes();
-        let empty_cell_count = rows.iter().fold(0u8, |mut acc, row| {
-            acc += row.iter().filter(|c| c == &&Cell::Empty).count() as u8;
+        let empty_cell_count = rows.iter().fold(0, |mut acc, row| {
+            acc += row.iter().filter(|c| c == &&Cell::Empty).count();
             acc
         });
 
