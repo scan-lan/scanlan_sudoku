@@ -4,7 +4,6 @@ pub use generator::{generate, Difficulty};
 pub use grid::{get_base_solution, Grid};
 pub use grid_trait::DisplayableGrid;
 pub use solver::solve_backtracking_heuristics;
-pub use types::Move;
 
 pub use crate::{CELL_WIDTH, NUM_WIDTH, ORDER, SIZE};
 
@@ -17,4 +16,3 @@ mod generator;
 mod grid;
 mod grid_trait;
 mod solver;
-mod types;

@@ -6,8 +6,14 @@ use rand::seq::SliceRandom;
 use super::{grid::get_box_coords_containing, Cell, Coord, NUM_WIDTH, ORDER, SIZE};
 
 #[derive(Debug, Clone)]
+/// Struct representing the possible values for cells in a `Grid`. If a value is
+/// in a set, that value is a valid possibility for the cell at the
+/// corresponding position in the `Grid`.
+/// If a set contains `0`, this indicates it can't be changed and shouldn't be
+/// considered by methods such as `get_min_candidates`.
 pub struct CandidateMatrix([[HashSet<u8>; SIZE]; SIZE]);
 
+/// Create the candidate matrix for the grid passed as rows.
 impl From<[[Cell; SIZE]; SIZE]> for CandidateMatrix {
     fn from(rows: [[Cell; SIZE]; SIZE]) -> Self {
         let candidates = HashSet::from(array::from_fn::<u8, SIZE, _>(|i| (i + 1) as u8));
@@ -33,19 +39,20 @@ impl From<[[Cell; SIZE]; SIZE]> for CandidateMatrix {
 }
 
 impl CandidateMatrix {
+    /// Create a new candidate matrix
     pub fn new() -> Self {
         let mut c_matrix = HashSet::from(array::from_fn::<u8, SIZE, _>(|i| (i + 1) as u8));
         c_matrix.shrink_to(SIZE);
         CandidateMatrix(array::from_fn(|_| array::from_fn(|_| c_matrix.clone())))
     }
 
+    /// Get the canidates for the cell at `cell`.
     pub fn get_candidates(&self, cell: Coord) -> Vec<u8> {
         Vec::from_iter(self.0[cell.row][cell.col].clone())
     }
 
-    /// Update the candidate sets for each group containing `cell`. Returns a
-    /// deduplicated vector of coordinates of all candidate sets changed by the
-    /// update.
+    /// Update the candidate sets for each group containing `cell`. This removes
+    /// `val` from all cells in these groups if it's present.
     pub fn update_around(&mut self, cell: Coord, val: u8) -> Result<(), ()> {
         for candidates in self.0[cell.row].iter_mut() {
             candidates.remove(&val);
@@ -71,21 +78,9 @@ impl CandidateMatrix {
         Ok(())
     }
 
-    pub fn collapse(&mut self, cell: Coord) -> u8 {
-        let val = *self.0[cell.row][cell.col]
-            .iter()
-            .next()
-            .expect("don't call collapse on a cell with 0 candidates");
-
-        val
-    }
-
+    /// Remove candiate `val` from `cell`.
     pub fn remove_candidate(&mut self, cell: Coord, val: u8) -> bool {
         self.0[cell.row][cell.col].remove(&val)
-    }
-
-    pub fn add_candidate(&mut self, cell: Coord, val: u8) -> bool {
-        self.0[cell.row][cell.col].insert(val)
     }
 
     /// Gets the coordinates of the cell with the lowest possibilities in the
@@ -114,13 +109,37 @@ impl CandidateMatrix {
             .expect("There has to be a minimum")
     }
 
-    /// This marks a 'Filled' cell as fixed, so it won't be included in
+    /// This marks a cell as fixed, so it won't be included in
     /// `get_min_candidates` results.
     pub fn set_fixed(&mut self, cell: Coord) {
         self.0[cell.row][cell.col] = HashSet::from([0]);
     }
 }
 
+/// Enables displaying the candidate matrix for debugging
+impl fmt::Display for CandidateMatrix {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let num_width = NUM_WIDTH as usize;
+        let line_width = SIZE * (num_width * ORDER + 1) + (2 * (ORDER - 1)) + 1;
+        let box_width = line_width / ORDER + 1;
+
+        for (i, row) in self.0.iter().enumerate() {
+            let row_str = fmt_row(row).expect("Shouldn't fail");
+            write!(f, "{row_str}")?;
+            for _ in 0..(ORDER - 1) {
+                write!(f, "{:>box_width$}", "|")?;
+            }
+            writeln!(f)?;
+
+            if i != SIZE - 1 && i % ORDER == ORDER - 1 {
+                writeln!(f, "{:->line_width$}", "-")?;
+            }
+        }
+        Ok(())
+    }
+}
+
+/// Helper function for displaying a candidate matrix for debugging purposes
 fn fmt_row(row: &[HashSet<u8>; SIZE]) -> Result<String, fmt::Error> {
     let width = NUM_WIDTH as usize;
     let mut s = String::new();
@@ -147,26 +166,4 @@ fn fmt_row(row: &[HashSet<u8>; SIZE]) -> Result<String, fmt::Error> {
         writeln!(s)?;
     }
     Ok(s)
-}
-
-impl fmt::Display for CandidateMatrix {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let num_width = NUM_WIDTH as usize;
-        let line_width = SIZE * (num_width * ORDER + 1) + (2 * (ORDER - 1)) + 1;
-        let box_width = line_width / ORDER + 1;
-
-        for (i, row) in self.0.iter().enumerate() {
-            let row_str = fmt_row(row).expect("Shouldn't fail");
-            write!(f, "{row_str}")?;
-            for _ in 0..(ORDER - 1) {
-                write!(f, "{:>box_width$}", "|")?;
-            }
-            writeln!(f)?;
-
-            if i != SIZE - 1 && i % ORDER == ORDER - 1 {
-                writeln!(f, "{:->line_width$}", "-")?;
-            }
-        }
-        Ok(())
-    }
 }

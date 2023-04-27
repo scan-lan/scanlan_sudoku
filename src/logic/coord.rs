@@ -1,6 +1,8 @@
 use std::fmt;
 
 #[derive(PartialEq, Eq, Clone, Copy, PartialOrd, Ord)]
+/// Struct to represent a coordinate which would be used to get a value from
+/// a Sudoku grid.
 pub struct Coord {
     pub row: usize,
     pub col: usize,
@@ -18,6 +20,7 @@ impl fmt::Display for Coord {
     }
 }
 
+/// Allow constructing a coord from a tuple and vice-versa
 impl From<(usize, usize)> for Coord {
     fn from((row, col): (usize, usize)) -> Self {
         Coord { row, col }
