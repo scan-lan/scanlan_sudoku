@@ -2,6 +2,8 @@ use std::{array, fmt};
 
 use super::{grid::row_coords_to_box_coords, CELL_WIDTH, ORDER, SIZE};
 
+/// Trait that allows transforming from a representation of a Sudoku grid with
+/// inner arrays as rows into one where they're columns or boxes.
 pub trait GridTrait<T> {
     fn cols(&self) -> [[T; SIZE]; SIZE];
     fn boxes(&self) -> [[T; SIZE]; SIZE];
@@ -23,6 +25,8 @@ impl<T: Clone> GridTrait<T> for [[T; SIZE]; SIZE] {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+/// Wrapper around the standard array type that enables printing it as a
+/// Sudoku grid.
 pub struct DisplayableGrid<T>(pub [[T; SIZE]; SIZE]);
 
 impl<T: fmt::Display> fmt::Display for DisplayableGrid<T> {
