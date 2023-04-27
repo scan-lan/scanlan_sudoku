@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 
-use super::{puzzle::Coord, Grid};
+use super::{Coord, Grid};
 
 /// Solve grid `g` using a backtracking algorithm with heurisitics
 pub fn solve_backtracking_heuristics(mut g: Grid) -> Option<Grid> {

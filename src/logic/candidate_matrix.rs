@@ -3,7 +3,7 @@ use std::{array, collections::HashSet, fmt};
 
 use rand::seq::SliceRandom;
 
-use super::{grid::get_box_coords_containing, puzzle::Coord, Cell, NUM_WIDTH, ORDER, SIZE};
+use super::{grid::get_box_coords_containing, Cell, Coord, NUM_WIDTH, ORDER, SIZE};
 
 #[derive(Debug, Clone)]
 pub struct CandidateMatrix([[HashSet<u8>; SIZE]; SIZE]);

@@ -1,4 +1,4 @@
-use super::{puzzle::Coord, Cell};
+use super::{Cell, Coord};
 
 pub struct Move {
     pub cell: Coord,

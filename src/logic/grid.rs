@@ -1,42 +1,16 @@
 use super::{
     candidate_matrix::CandidateMatrix,
     grid_trait::{DisplayableGrid, GridTrait},
-    puzzle::Coord,
-    Group, CELL_WIDTH, ORDER, SIZE,
+    Cell, Coord, GridArray, ORDER, SIZE,
 };
 
-use colored::Colorize;
 use std::{array, collections::HashSet, fmt};
-
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
-pub enum Cell {
-    Clue(u8),
-    Filled(u8),
-    Empty,
-}
-
-impl fmt::Display for Cell {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let width = usize::try_from(CELL_WIDTH).expect("cell width should always be small");
-        match self {
-            Self::Clue(n) => {
-                if n == &0 {
-                    write!(f, "{:>width$}", '?')
-                } else {
-                    write!(f, "{:>width$}", n.to_string().bold())
-                }
-            }
-            Self::Filled(n) => write!(f, "{:width$}", n),
-            Self::Empty => write!(f, "{:width$}", " "),
-        }
-    }
-}
 
 #[derive(Clone, Debug)]
 pub struct Grid {
-    rows: [Group; SIZE],
-    cols: [Group; SIZE],
-    boxes: [Group; SIZE],
+    rows: GridArray,
+    cols: GridArray,
+    boxes: GridArray,
     candidate_matrix: CandidateMatrix,
     pub empty_cell_count: usize,
     pub solved: bool,
@@ -63,7 +37,7 @@ impl Grid {
             && self.boxes.iter().all(different);
     }
 
-    pub fn rows(&self) -> &[Group; SIZE] {
+    pub fn rows(&self) -> &GridArray {
         &self.rows
     }
 
@@ -138,7 +112,7 @@ impl Grid {
         self.candidate_matrix.get_candidates(cell)
     }
 
-    pub fn from_rows(rows: [[Cell; SIZE]; SIZE]) -> Self {
+    pub fn from_rows(rows: GridArray) -> Self {
         let cols = rows.cols();
         let boxes = rows.boxes();
         let empty_cell_count = rows.iter().fold(0, |mut acc, row| {
@@ -175,8 +149,8 @@ impl Grid {
     }
 }
 
-impl From<[[Cell; SIZE]; SIZE]> for Grid {
-    fn from(rows: [Group; SIZE]) -> Grid {
+impl From<GridArray> for Grid {
+    fn from(rows: GridArray) -> Grid {
         Self::from_rows(rows)
     }
 }
@@ -251,7 +225,7 @@ pub fn get_box_coords_containing(cell: Coord) -> [Coord; SIZE] {
     array::from_fn(|i| (row_offset + i / ORDER, col_offset + i % ORDER).into())
 }
 
-pub fn get_base_solution() -> [Group; SIZE] {
+pub fn get_base_solution() -> GridArray {
     array::from_fn(|i| {
         array::from_fn(|j| Cell::Clue((1 + (j + (i / ORDER) + (i % ORDER) * ORDER) % SIZE) as u8))
     })
