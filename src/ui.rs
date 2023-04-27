@@ -31,18 +31,31 @@ pub fn run() {
     }
 }
 
-fn difficulty_menu() -> Option<Difficulty> {
-    let msg = "\nSelect puzzle difficulty:\n\n- Easy [e]\n- Medium [m]\n- Hard[h]\n";
-    let map = BTreeMap::from([
-        ('e', Some(Difficulty::Easy)),
-        ('m', Some(Difficulty::Medium)),
-        ('h', Some(Difficulty::Hard)),
-        ('q', None),
-    ]);
-
-    char_prompt(msg, map, Some('m'))
+#[derive(Debug, Copy, Clone)]
+enum Choice {
+    Play,
+    Solve,
+    Quit,
 }
 
+/// This main menu handles which of the high-level activities a player would
+/// like to do: play a puzzle or enter one to be solved.
+fn main_menu() -> Choice {
+    println!("{}{SMALL_TITLE}{}", "\n".repeat(4), "\n".repeat(4));
+    let map = BTreeMap::from([
+        ('p', Choice::Play),
+        ('s', Choice::Solve),
+        ('q', Choice::Quit),
+    ]);
+    println!(
+        "[P]lay a game or enter a puzzle to be [s]olved?\n\n(Enter \"q\" at any time to quit)"
+    );
+
+    char_prompt("What would you like to do?", map, Some('p'))
+}
+
+/// The "play" sub-menu of the main menu. This obtains a player's difficulty
+/// selection, as well as asking if they want a time limit.
 fn play() {
     if let Some(difficulty) = difficulty_menu() {
         println!(
@@ -72,6 +85,21 @@ fn play() {
     }
 }
 
+/// A menu for asking the player what difficulty they'd like to play.
+fn difficulty_menu() -> Option<Difficulty> {
+    let msg = "\nSelect puzzle difficulty:\n\n- Easy [e]\n- Medium [m]\n- Hard[h]\n";
+    let map = BTreeMap::from([
+        ('e', Some(Difficulty::Easy)),
+        ('m', Some(Difficulty::Medium)),
+        ('h', Some(Difficulty::Hard)),
+        ('q', None),
+    ]);
+
+    char_prompt(msg, map, Some('m'))
+}
+
+/// A menu for asking if the player want a time limit. Returns `None` if they
+/// don't, or a duration based on the answer they give in minutes.
 fn time_menu() -> Option<time::Duration> {
     println!("Would you like to set a time limit on your game? [y/n]");
     loop {
@@ -87,18 +115,21 @@ fn time_menu() -> Option<time::Duration> {
     }
 }
 
+/// Enum to model the result of a game
 enum Game {
     Solved(time::Duration),
     Quit,
 }
 
-/// The main
+/// The main game loop for when a player is solving a puzzle. Includes undo/
+/// redo support, time constraints, and sophisticated input validation.
 fn game_loop(mut g: Grid, time_constraint: Option<time::Duration>) -> Game {
     let mut undo_history: Vec<Grid> = Vec::new();
     let mut redo_history: Vec<Grid> = Vec::new();
     let now = time::Instant::now();
     let (tx, rx) = mpsc::channel();
 
+    // spawn a thread to track the elapsed time in the background
     if let Some(duration) = time_constraint {
         thread::spawn(move || {
             let now = time::Instant::now();
@@ -109,8 +140,7 @@ fn game_loop(mut g: Grid, time_constraint: Option<time::Duration>) -> Game {
         });
     }
 
-    println!("{g}");
-    println!("{HOW_TO}\n");
+    println!("{g}\n\n{HOW_TO}\n");
 
     while !g.solved {
         match get_move(&g) {
@@ -146,6 +176,7 @@ fn game_loop(mut g: Grid, time_constraint: Option<time::Duration>) -> Game {
                 }
                 None => println!("No more moves to redo"),
             },
+
             PromptResponse::Quit => return Game::Quit,
         }
 
@@ -159,14 +190,10 @@ fn game_loop(mut g: Grid, time_constraint: Option<time::Duration>) -> Game {
     Game::Solved(now.elapsed())
 }
 
+/// The "solve" sub-menu of the main menu. This obtains a grid from the player
+/// and proceeds to solve it.
 fn solve() {
-    let g = grid_from_input();
-
-    match g {
-        None => {
-            println!("{THANK_YOU}");
-            return;
-        }
+    match grid_from_input() {
         Some(g) => {
             println!("{}", g);
 
@@ -178,26 +205,10 @@ fn solve() {
                 println!("{}", g);
             }
         }
+        None => {
+            println!("{THANK_YOU}");
+        }
     }
-}
-
-#[derive(Debug, Copy, Clone)]
-enum Choice {
-    Play,
-    Solve,
-    Quit,
-}
-
-fn main_menu() -> Choice {
-    println!("{}{SMALL_TITLE}{}", "\n".repeat(4), "\n".repeat(4));
-    let map = BTreeMap::from([
-        ('p', Choice::Play),
-        ('s', Choice::Solve),
-        ('q', Choice::Quit),
-    ]);
-    println!("Play a game [p] or solve a puzzle [s]?\n\n(Enter \"q\" at any time to quit)");
-
-    char_prompt("What would you like to do?", map, Some('p'))
 }
 
 /// Transforms a Vec into a grid. This will panic if the Vec is too small.

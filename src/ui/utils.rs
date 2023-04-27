@@ -11,6 +11,7 @@ use crate::{
 use lazy_static::lazy_static;
 use regex::Regex;
 
+/// Get a coord from the player. The parser uses a very forgiving regex.
 pub fn get_coord() -> PromptResponse<Coord> {
     lazy_static! {
         static ref COORD_REGEX: Regex = Regex::new(r"^\D*(?P<row>\d)\D*(?P<col>\d)\D*$").unwrap();
@@ -40,6 +41,9 @@ pub fn get_coord() -> PromptResponse<Coord> {
     }
 }
 
+/// Formats time in seconds into "x hours, x minutes, x seconds", omitting
+/// units appropriately and accounting for correct pluralisation, e.g. "25
+/// minutes, 1 second".
 pub fn format_time(t: u64) -> String {
     let secs = t % 60;
     let show_s_secs = if secs != 1 { "s" } else { "" };
@@ -57,6 +61,8 @@ pub fn format_time(t: u64) -> String {
     }
 }
 
+/// Obtains a coordinate and a cell value from the player, accepting undo/redo
+/// and quit.
 pub fn get_move(g: &Grid) -> PromptResponse<(Coord, Cell)> {
     loop {
         match get_coord() {
@@ -94,6 +100,8 @@ pub enum PromptResponse<T> {
     Val(T),
 }
 
+/// Get a string response from the player, accounting for any unexepected
+/// read errors.
 pub fn get_response(prompt: &str) -> String {
     loop {
         print!("{prompt}");
@@ -108,6 +116,7 @@ pub fn get_response(prompt: &str) -> String {
     }
 }
 
+/// Gets a single-character response from the player.
 pub fn get_char_response(prompt: &str) -> char {
     loop {
         let resp = get_response(prompt);
@@ -119,7 +128,8 @@ pub fn get_char_response(prompt: &str) -> char {
     }
 }
 
-pub fn format_chars<T>(map: &BTreeMap<char, T>) -> String
+/// Helper function to format a list of chars e.g. "[a, b, c]".
+fn format_chars<T>(map: &BTreeMap<char, T>) -> String
 where
     T: Copy,
 {
