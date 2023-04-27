@@ -19,5 +19,5 @@
   - [x] Grid with numbers
   - [x] Undo/redo
   - [x] Timing
-  - [ ] Setting time constraints
+  - [x] Setting time constraints
 

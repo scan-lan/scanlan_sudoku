@@ -1,6 +1,8 @@
 use std::cmp::Ordering;
 use std::collections::BTreeMap;
 use std::io::{self, Write};
+use std::sync::mpsc;
+use std::thread;
 use std::time;
 
 use crate::logic::{
@@ -46,7 +48,9 @@ fn play() {
         );
         let (g, time_taken) = generate(difficulty);
         println!("Took {:?}\n", time_taken);
-        match game_loop(g) {
+
+        let time_constraint = time_menu();
+        match game_loop(g, time_constraint) {
             Game::Solved(solve_time) => {
                 let solve_secs = solve_time.as_secs();
                 println!(
@@ -58,6 +62,21 @@ fn play() {
         }
     } else {
         println!("{THANK_YOU}");
+    }
+}
+
+fn time_menu() -> Option<time::Duration> {
+    println!("Would you like to set a time limit on your game? [y/n]");
+    loop {
+        let r = get_char_response("n> ");
+        match r {
+            'y' => {
+                println!("Enter the time constraint you wish to set in minutes.");
+                return Some(time::Duration::from_secs(get_num_response("> ") * 60));
+            }
+            'n' => return None,
+            _ => println!("Please enter 'y' or 'n'"),
+        }
     }
 }
 
@@ -83,10 +102,22 @@ enum Game {
     Quit,
 }
 
-fn game_loop(mut g: Grid) -> Game {
+/// The main
+fn game_loop(mut g: Grid, time_constraint: Option<time::Duration>) -> Game {
     let mut undo_history: Vec<Grid> = Vec::new();
     let mut redo_history: Vec<Grid> = Vec::new();
     let now = time::Instant::now();
+    let (tx, rx) = mpsc::channel();
+
+    if let Some(duration) = time_constraint {
+        thread::spawn(move || {
+            let now = time::Instant::now();
+            while now.elapsed() < duration {
+                thread::sleep(time::Duration::from_millis(500));
+            }
+            let _ = tx.send(true);
+        });
+    }
 
     println!("{g}");
     println!("{HOW_TO}\n");
@@ -126,6 +157,13 @@ fn game_loop(mut g: Grid) -> Game {
                 None => println!("No more moves to redo"),
             },
             PromptResponse::Quit => return Game::Quit,
+        }
+
+        if time_constraint.is_some() {
+            if let Ok(_) = rx.try_recv() {
+                println!("Bad luck, you're out of time!");
+                return Game::Quit;
+            }
         }
     }
     Game::Solved(now.elapsed())
@@ -350,6 +388,18 @@ where
         }
 
         println!("Please enter a value in {}", format_chars(&map));
+    }
+}
+
+/// Prompts player for a response. Loops until a valid number has been entered.
+fn get_num_response(prompt: &str) -> u64 {
+    loop {
+        let response = get_response(prompt);
+        if let Ok(n) = response.parse() {
+            return n;
+        } else {
+            println!("Please enter a valid number");
+        }
     }
 }
 
