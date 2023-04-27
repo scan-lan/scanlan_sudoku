@@ -14,8 +14,8 @@ use super::{grid::get_box_coords_containing, Cell, Coord, NUM_WIDTH, ORDER, SIZE
 pub struct CandidateMatrix([[HashSet<u8>; SIZE]; SIZE]);
 
 /// Create the candidate matrix for the grid passed as rows.
-impl From<[[Cell; SIZE]; SIZE]> for CandidateMatrix {
-    fn from(rows: [[Cell; SIZE]; SIZE]) -> Self {
+impl From<&[[Cell; SIZE]; SIZE]> for CandidateMatrix {
+    fn from(rows: &[[Cell; SIZE]; SIZE]) -> Self {
         let candidates = HashSet::from(array::from_fn::<u8, SIZE, _>(|i| (i + 1) as u8));
 
         let mut cm = CandidateMatrix(rows.map(|row| {

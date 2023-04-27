@@ -44,6 +44,7 @@ pub fn generate(d: Difficulty) -> (Grid, Duration) {
             let _ = g.clear(*coord);
         });
     g.set_clues();
+    g.reset_candidate_matrix();
 
     (g, now.elapsed())
 }

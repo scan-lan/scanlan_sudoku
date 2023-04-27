@@ -103,7 +103,7 @@ fn difficulty_menu() -> Option<Difficulty> {
 fn time_menu() -> Option<time::Duration> {
     println!("Would you like to set a time limit on your game? [y/n]");
     loop {
-        let r = get_char_response("n> ");
+        let r = get_char_response("> ");
         match r {
             'y' => {
                 println!("Enter the time constraint you wish to set in minutes.");
@@ -121,8 +121,8 @@ enum Game {
     Quit,
 }
 
-/// The main game loop for when a player is solving a puzzle. Includes undo/
-/// redo support, time constraints, and sophisticated input validation.
+/// The main game loop for when a player is solving a puzzle. Includes
+/// undo/redo support, time constraints, and sophisticated input validation.
 fn game_loop(mut g: Grid, time_constraint: Option<time::Duration>) -> Game {
     let mut undo_history: Vec<Grid> = Vec::new();
     let mut redo_history: Vec<Grid> = Vec::new();

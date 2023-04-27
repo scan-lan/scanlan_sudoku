@@ -83,6 +83,8 @@ impl Grid {
     pub fn update(&mut self, cell: Coord, val: u8) -> Result<(), GridError> {
         if let Cell::Clue(_) = self.get_cell(cell) {
             return Err(GridError::new(ErrorKind::UpdatedClue, cell, val));
+        } else if !self.candidate_matrix.get_candidates(cell).contains(&val) {
+            return Err(GridError::new(ErrorKind::NotInCandidates, cell, val));
         } else if let Cell::Empty = self.get_cell(cell) {
             self.empty_cell_count -= 1;
         }
@@ -131,7 +133,7 @@ impl Grid {
             rows,
             cols,
             boxes,
-            candidate_matrix: rows.into(),
+            candidate_matrix: CandidateMatrix::from(&rows),
             empty_cell_count,
             solved: false,
         };
@@ -153,6 +155,10 @@ impl Grid {
                 }
             }
         }
+    }
+
+    pub fn reset_candidate_matrix(&mut self) {
+        self.candidate_matrix = CandidateMatrix::from(&self.rows);
     }
 }
 
@@ -185,16 +191,20 @@ pub struct GridError {
 
 impl GridError {
     fn new(kind: ErrorKind, cell: Coord, val: u8) -> Self {
+        let cell = Coord::from((cell.row + 1, cell.col + 1));
         let details = match kind {
             ErrorKind::ClearedClue => format!(
-                "failed to clear cell at {cell} because it's a clue",
+                "Failed to clear cell at {cell} because it's a clue",
             ),
             ErrorKind::UpdatedClue => format!(
-                "failed to update cell at {cell} with value `{val}` because it's a clue",
+                "Failed to update cell at {cell} with value `{val}` because it's a clue",
             ),
             ErrorKind::ZeroCandidates => format!(
-                "updating cell {cell} with value `{val}` resulted in a cell having zero candidate values"
-            )
+                "Updating cell {cell} with value `{val}` resulted in a cell having zero candidate values"
+            ),
+            ErrorKind::NotInCandidates => format!(
+                "Updating cell {cell} with value {val} is a mistake. Check again"
+                )
         };
 
         GridError { details, kind }
@@ -216,6 +226,7 @@ impl std::error::Error for GridError {
 #[derive(Clone, Copy, Debug)]
 pub enum ErrorKind {
     ClearedClue,
+    NotInCandidates,
     UpdatedClue,
     ZeroCandidates,
 }
