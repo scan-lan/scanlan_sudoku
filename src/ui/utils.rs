@@ -1,3 +1,4 @@
+use crate::NUM_WIDTH;
 use std::{
     cmp::Ordering,
     collections::BTreeMap,
@@ -14,7 +15,11 @@ use regex::Regex;
 /// Get a coord from the player. The parser uses a very forgiving regex.
 pub fn get_coord() -> PromptResponse<Coord> {
     lazy_static! {
-        static ref COORD_REGEX: Regex = Regex::new(r"^\D*(?P<row>\d)\D*(?P<col>\d)\D*$").unwrap();
+        static ref COORD_REGEX: Regex = Regex::new(
+            format!("^\\D*(?P<row>\\d{{1, {NUM_WIDTH}}})\\D*(?P<col>\\d{{1, {NUM_WIDTH}}})\\D*$")
+                .as_str()
+        )
+        .unwrap();
     }
     loop {
         let r = get_response("Enter cell (format: \"row col\")\n> ");
