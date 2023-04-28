@@ -69,29 +69,26 @@ pub fn format_time(t: u64) -> String {
 /// Obtains a coordinate and a cell value from the player, accepting undo/redo
 /// and quit.
 pub fn get_move(g: &Grid) -> PromptResponse<(Coord, Cell)> {
-    loop {
-        match get_coord() {
-            PromptResponse::Val(user_cell) => {
-                // adjust coord to match the zero-based array
-                let acc_cell = Coord::from((user_cell.row - 1, user_cell.col - 1));
+    match get_coord() {
+        PromptResponse::Val(user_cell) => {
+            // adjust coord to match the zero-based array
+            let acc_cell = Coord::from((user_cell.row - 1, user_cell.col - 1));
 
-                // show user the grid they've chosen
-                let mut display_g = DisplayableGrid(g.rows().clone());
-                display_g.0[acc_cell.row][acc_cell.col] = Cell::Clue(0);
-                println!("{display_g}\nCell {user_cell} marked with \"?\"");
+            // show user the grid they've chosen
+            let mut display_g = DisplayableGrid(*g.rows());
+            display_g.0[acc_cell.row][acc_cell.col] = Cell::Clue(0);
+            println!("{display_g}\nCell {user_cell} marked with \"?\"");
 
-                match prompt_for_value(&format!("Enter the value for cell {user_cell}\n> "), false)
-                {
-                    PromptResponse::Val(val) => return PromptResponse::Val((acc_cell, val)),
-                    PromptResponse::Undo => return PromptResponse::Undo,
-                    PromptResponse::Redo => return PromptResponse::Redo,
-                    PromptResponse::Quit => return PromptResponse::Quit,
-                }
+            match prompt_for_value(&format!("Enter the value for cell {user_cell}\n> "), false) {
+                PromptResponse::Val(val) => PromptResponse::Val((acc_cell, val)),
+                PromptResponse::Undo => PromptResponse::Undo,
+                PromptResponse::Redo => PromptResponse::Redo,
+                PromptResponse::Quit => PromptResponse::Quit,
             }
-            PromptResponse::Undo => return PromptResponse::Undo,
-            PromptResponse::Redo => return PromptResponse::Redo,
-            PromptResponse::Quit => return PromptResponse::Quit,
         }
+        PromptResponse::Undo => PromptResponse::Undo,
+        PromptResponse::Redo => PromptResponse::Redo,
+        PromptResponse::Quit => PromptResponse::Quit,
     }
 }
 

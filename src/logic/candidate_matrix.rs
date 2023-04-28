@@ -139,6 +139,12 @@ impl fmt::Display for CandidateMatrix {
     }
 }
 
+impl Default for CandidateMatrix {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 /// Helper function for displaying a candidate matrix for debugging purposes
 fn fmt_row(row: &[HashSet<u8>; SIZE]) -> Result<String, fmt::Error> {
     let width = NUM_WIDTH as usize;

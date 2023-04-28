@@ -180,11 +180,9 @@ fn game_loop(mut g: Grid, time_constraint: Option<time::Duration>) -> Game {
             PromptResponse::Quit => return Game::Quit,
         }
 
-        if time_constraint.is_some() {
-            if let Ok(_) = rx.try_recv() {
-                println!("Bad luck, you're out of time!");
-                return Game::Quit;
-            }
+        if time_constraint.is_some() && rx.try_recv().is_ok() {
+            println!("Bad luck, you're out of time!");
+            return Game::Quit;
         }
     }
     Game::Solved(now.elapsed())

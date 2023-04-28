@@ -24,22 +24,18 @@ pub fn generate(d: Difficulty) -> (Grid, Duration) {
 
     let to_delete = match d {
         Difficulty::Easy => (40..45)
-            .into_iter()
             .choose(&mut rand::thread_rng())
             .unwrap_or(43),
         Difficulty::Medium => (46..50)
-            .into_iter()
             .choose(&mut rand::thread_rng())
             .unwrap_or(47),
         Difficulty::Hard => (51..56)
-            .into_iter()
             .choose(&mut rand::thread_rng())
             .unwrap_or(53),
     };
 
     coords
         .choose_multiple(&mut rand::thread_rng(), to_delete)
-        .into_iter()
         .for_each(|coord| {
             let _ = g.clear(*coord);
         });
