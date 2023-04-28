@@ -9,7 +9,7 @@
 - demonstrate a solve
 
 - [x] record demo
+- [] publish to crates.io
 - [] finalise report
 - [] benchmark solver
-- [] publish to crates.io
 

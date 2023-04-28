@@ -8,6 +8,11 @@ homepage = "https://github.com/scan-lan/scanlan_sudoku"
 repository = "https://github.com/scan-lan/scanlan_sudoku"
 documentation = "https://github.com/scan-lan/scanlan_sudoku"
 readme = "README.md"
+exclude = [
+  "script.md",
+  "README.txt",
+  "cli_mockup",
+]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
