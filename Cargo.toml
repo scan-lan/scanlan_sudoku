@@ -2,6 +2,12 @@
 name = "scanlan_sudoku"
 version = "0.1.0"
 edition = "2021"
+license = "Unlicense"
+description = "A command-line Sudoku game, created for a university project"
+homepage = "https://github.com/scan-lan/scanlan_sudoku"
+repository = "https://github.com/scan-lan/scanlan_sudoku"
+documentation = "https://github.com/scan-lan/scanlan_sudoku"
+readme = "README.md"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

@@ -8,7 +8,7 @@
 - demonstrate input validation
 - demonstrate a solve
 
-- [] record demo
+- [x] record demo
 - [] finalise report
 - [] benchmark solver
 - [] publish to crates.io
